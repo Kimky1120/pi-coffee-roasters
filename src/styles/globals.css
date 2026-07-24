@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f5f1;
+  --surface: #efebe2;
+  --foreground: #1f1f1f;
+  --primary: #233127;
+  --border: #d9d9d9;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-border: var(--border);
+
+  --font-display: var(--font-cormorant);
+  --font-sans: var(--font-pretendard);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+::selection {
+  background: var(--primary);
+  color: var(--background);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/*
+ * fixed Header(56~64px)에 앵커 이동 시 섹션 상단이 가려지지 않도록 보정.
+ * 섹션 컴포넌트 자체는 건드리지 않고 전역 규칙으로만 처리한다.
+ */
+main > section[id] {
+  scroll-margin-top: 4rem;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+  border-radius: 2px;
+}

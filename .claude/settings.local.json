@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Start-Sleep -Seconds 3; \\(Invoke-WebRequest -Uri \"http://localhost:3000\" -UseBasicParsing\\).Content | Select-String -Pattern \"about|Philosophy\" -SimpleMatch)",
+      "PowerShell(npm run *)"
+    ]
+  }
+}

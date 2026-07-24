@@ -11,6 +11,15 @@ export const COFFEE_BEANS: CoffeeBean[] = [
     type: "Blend",
     tastingNotes: ["Nutty", "Dark Chocolate", "Caramel"],
     status: "available",
+    origin: "Brazil, Colombia Blend",
+    acidity: 2,
+    sweetness: 4,
+    bitterness: 3,
+    body: 4,
+    roastLevel: "Medium-Dark",
+    description:
+      "고소한 견과류와 다크 초콜릿이 어우러지는, 균형감 있고 부드러운 데일리 블렌드.",
+    recommendedBrewing: ["Hand Drip", "Espresso"],
   },
   {
     code: "002",
@@ -18,6 +27,15 @@ export const COFFEE_BEANS: CoffeeBean[] = [
     type: "Blend",
     tastingNotes: ["Nutty", "Roasted Corn"],
     status: "available",
+    origin: "Vietnam, Brazil Blend",
+    acidity: 1,
+    sweetness: 3,
+    bitterness: 4,
+    body: 5,
+    roastLevel: "Dark",
+    description:
+      "묵직한 바디감과 구수한 로스티드 콘 향이 특징인 진한 다크 로스트 블렌드.",
+    recommendedBrewing: ["Espresso", "Moka Pot"],
   },
   {
     code: "004",
@@ -25,5 +43,14 @@ export const COFFEE_BEANS: CoffeeBean[] = [
     type: "Decaf",
     tastingNotes: ["Chocolate", "Nutty"],
     status: "available",
+    origin: "Colombia (Decaf)",
+    acidity: 2,
+    sweetness: 3,
+    bitterness: 2,
+    body: 3,
+    roastLevel: "Medium",
+    description:
+      "카페인 부담 없이 즐기는 초콜릿과 견과류 풍미의 부드러운 디카페인 원두.",
+    recommendedBrewing: ["Hand Drip"],
   },
 ];

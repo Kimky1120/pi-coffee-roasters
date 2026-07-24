@@ -1,5 +1,6 @@
 import type { CoffeeBean } from "@/types/coffee";
 import { cn } from "@/lib/utils/cn";
+import { FlavorMeter } from "./FlavorMeter";
 
 const STATUS_LABEL: Record<CoffeeBean["status"], string> = {
   available: "Available",
@@ -40,15 +41,48 @@ export function CoffeeCard({ bean }: { bean: CoffeeBean }) {
         </h3>
       </div>
 
-      <div className="mt-auto flex flex-wrap gap-2 pt-4">
-        {bean.tastingNotes.map((note) => (
-          <span
-            key={note}
-            className="rounded-full bg-primary/5 px-3 py-1 text-xs text-foreground/70"
-          >
-            {note}
+      <p className="font-sans text-sm leading-relaxed text-foreground/70">
+        {bean.description}
+      </p>
+
+      <span className="font-sans text-xs tracking-[0.15em] text-foreground/50">
+        {bean.origin} · {bean.roastLevel}
+      </span>
+
+      <FlavorMeter bean={bean} />
+
+      <div className="mt-auto flex flex-col gap-3 pt-4">
+        <div className="flex flex-col gap-2">
+          <span className="font-sans text-[10px] uppercase tracking-[0.2em] text-foreground/40">
+            Flavor Notes
           </span>
-        ))}
+          <div className="flex flex-wrap gap-2">
+            {bean.tastingNotes.map((note) => (
+              <span
+                key={note}
+                className="rounded-full bg-primary/5 px-3 py-1 text-xs text-foreground/70"
+              >
+                {note}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <span className="font-sans text-[10px] uppercase tracking-[0.2em] text-foreground/40">
+            Best With
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {bean.recommendedBrewing.map((method) => (
+              <span
+                key={method}
+                className="rounded-full border border-border px-3 py-1 text-xs text-foreground/60"
+              >
+                {method}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

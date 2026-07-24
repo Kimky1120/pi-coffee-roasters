@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { NAV_ITEMS } from "@/constants/nav";
@@ -32,14 +33,15 @@ export function HeaderContent() {
       )}
     >
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-6 sm:h-16">
-        <a
-          href="#hero"
-          className={cn(
-            "font-display text-lg font-medium tracking-tight transition-colors duration-300 ease-out sm:text-xl",
-            scrolled ? "text-primary" : "text-background",
-          )}
-        >
-          {SITE_CONFIG.name}
+        <a href="#hero" className="shrink-0">
+          <Image
+            src={scrolled ? "/images/pi-logo-dark.png" : "/images/pi-logo-white.png"}
+            alt={SITE_CONFIG.name}
+            width={921}
+            height={417}
+            priority
+            className="h-auto w-[100px] object-contain sm:w-[125px]"
+          />
         </a>
 
         <nav aria-label="Main" className="hidden items-center gap-8 sm:flex">

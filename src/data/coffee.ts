@@ -51,6 +51,6 @@ export const COFFEE_BEANS: CoffeeBean[] = [
     roastLevel: "Dark",
     description:
       "카페인 부담 없이 즐기는 초콜릿과 견과류 풍미의 부드러운 디카페인 원두.",
-    recommendedBrewing: ["Hand Drip"],
+    recommendedBrewing: ["Espresso", "Hand Drip"],
   },
 ];

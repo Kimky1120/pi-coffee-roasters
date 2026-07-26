@@ -6,7 +6,7 @@ import { FooterContent } from "./FooterContent";
 export function Footer() {
   return (
     <footer className="relative w-full overflow-hidden border-t border-border bg-surface">
-      <div className="mx-auto w-full max-w-6xl px-6 py-16">
+      <div className="mx-auto w-full max-w-6xl px-6 py-12 sm:py-16">
         <FooterContent
           brandName={SITE_CONFIG.name}
           tagline={SITE_CONFIG.slogan}

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { ArrowUp } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { NavItem } from "@/constants/nav";
@@ -23,7 +24,7 @@ function getChannelDisplayValue(
   key: ContactChannelKey,
   value: string,
 ): string {
-  if (key === "instagramUrl") return "instagram.com";
+  if (key === "instagramUrl") return "instagram.com/picoffee.roasters";
   return value;
 }
 
@@ -59,9 +60,13 @@ export function FooterContent({
     >
       <div className="grid gap-6 sm:grid-cols-3 sm:gap-8">
         <div className="flex flex-col gap-2">
-          <span className="font-display text-xl font-medium tracking-tight text-primary">
-            {brandName}
-          </span>
+          <Image
+            src="/images/pi-logo-dark.png"
+            alt={brandName}
+            width={921}
+            height={417}
+            className="h-auto w-[100px] object-contain sm:w-[125px]"
+          />
           <p className="font-sans text-sm leading-relaxed text-foreground/60">
             {tagline}
           </p>

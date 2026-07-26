@@ -33,7 +33,7 @@ function getChannelDisplayValue(
   key: ContactChannelKey,
   value: string,
 ): string {
-  if (key === "instagramUrl") return "instagram.com";
+  if (key === "instagramUrl") return "instagram.com/picoffee.roasters";
   if (key === "naverMapUrl") return "map.naver.com";
   if (key === "googleMapUrl") return "google.com";
   return value;

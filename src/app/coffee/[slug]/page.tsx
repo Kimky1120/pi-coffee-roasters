@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { COFFEE_BEANS } from "@/data/coffee";
+import { PurchaseOptions } from "@/components/shop/PurchaseOptions";
 
 const DETAIL_IMAGES = Array.from(
   { length: 11 },
@@ -41,8 +42,8 @@ export default async function CoffeeDetailPage({
   if (!bean) notFound();
 
   return (
-    <main className="min-h-screen bg-[#f4f4f4] pt-16">
-      <div className="sticky top-16 z-20 border-b border-black/10 bg-[#f4f4f4]/90 backdrop-blur-md">
+    <main className="min-h-screen bg-[#f4f4f4] pt-14 sm:pt-16">
+      <div className="sticky top-14 z-20 border-b border-black/10 bg-[#f4f4f4]/90 backdrop-blur-md sm:top-16">
         <div className="mx-auto flex max-w-[860px] items-center justify-between gap-4 px-5 py-4 sm:px-8">
           <Link
             href="/#our-coffee"
@@ -58,7 +59,7 @@ export default async function CoffeeDetailPage({
       </div>
 
       <article className="mx-auto w-full max-w-[860px] bg-[#f4f4f4]">
-        <h1 className="sr-only">{bean.name} 상세페이지</h1>
+        <PurchaseOptions productName={bean.name} productSlug={bean.slug} />
         {DETAIL_IMAGES.map((src, index) => (
           <Image
             key={src}

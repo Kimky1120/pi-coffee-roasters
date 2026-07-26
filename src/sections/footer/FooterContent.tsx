@@ -19,6 +19,14 @@ function getChannelHref(key: ContactChannelKey, value: string): string | undefin
   }
 }
 
+function getChannelDisplayValue(
+  key: ContactChannelKey,
+  value: string,
+): string {
+  if (key === "instagramUrl") return "instagram.com";
+  return value;
+}
+
 export function FooterContent({
   brandName,
   tagline,
@@ -82,6 +90,7 @@ export function FooterContent({
             availableChannels.map((channel) => {
               const value = contact[channel.key];
               const href = getChannelHref(channel.key, value);
+              const displayValue = getChannelDisplayValue(channel.key, value);
               const isExternal = href?.startsWith("http") ?? false;
 
               return href ? (
@@ -92,14 +101,14 @@ export function FooterContent({
                   rel={isExternal ? "noopener noreferrer" : undefined}
                   className="break-all font-sans text-sm text-foreground/70 transition-colors duration-300 ease-out hover:text-primary sm:text-right"
                 >
-                  {value}
+                  {displayValue}
                 </a>
               ) : (
                 <span
                   key={channel.key}
                   className="break-all font-sans text-sm text-foreground/70 sm:text-right"
                 >
-                  {value}
+                  {displayValue}
                 </span>
               );
             })

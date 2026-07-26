@@ -13,12 +13,13 @@ export type FlavorScore = 1 | 2 | 3 | 4 | 5;
 export interface CoffeeBean {
   /** 3자리 상품 코드 (예: "001") */
   code: string;
+  slug: string;
   name: string;
   /** 예: "Single Origin", "Blend", "Decaf" */
   type: string;
   tastingNotes: string[];
   status: CoffeeStatus;
-  image?: string;
+  image: string;
   /** 원산지 (예: "Ethiopia Yirgacheffe") */
   origin: string;
   acidity: FlavorScore;

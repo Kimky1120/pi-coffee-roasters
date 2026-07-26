@@ -29,6 +29,16 @@ function getChannelHref(key: ContactChannelKey, value: string): string | undefin
   }
 }
 
+function getChannelDisplayValue(
+  key: ContactChannelKey,
+  value: string,
+): string {
+  if (key === "instagramUrl") return "instagram.com";
+  if (key === "naverMapUrl") return "map.naver.com";
+  if (key === "googleMapUrl") return "google.com";
+  return value;
+}
+
 function buildInquiryHref(contact: ContactInfo, subject: string): string | undefined {
   if (contact.email) {
     return `mailto:${contact.email}?subject=${encodeURIComponent(subject)}`;
@@ -70,6 +80,7 @@ export function ContactContent({
             availableChannels.map((channel) => {
               const value = contact[channel.key];
               const href = getChannelHref(channel.key, value);
+              const displayValue = getChannelDisplayValue(channel.key, value);
               const Icon = CHANNEL_ICONS[channel.key];
               const isExternal = href?.startsWith("http") ?? false;
 
@@ -89,11 +100,11 @@ export function ContactContent({
                         rel={isExternal ? "noopener noreferrer" : undefined}
                         className="break-all font-sans text-base text-primary underline-offset-4 hover:underline sm:text-lg"
                       >
-                        {value}
+                        {displayValue}
                       </a>
                     ) : (
                       <span className="break-all font-sans text-base text-primary sm:text-lg">
-                        {value}
+                        {displayValue}
                       </span>
                     )}
                   </div>

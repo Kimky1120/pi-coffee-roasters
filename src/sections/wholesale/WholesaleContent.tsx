@@ -11,6 +11,7 @@ import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { SectionIntro } from "@/components/ui/SectionIntro";
 import { DURATION, EASE, OFFSET, STAGGER } from "@/lib/motion";
+import { notoSansKR } from "@/lib/fonts";
 import type {
   WholesaleBenefit,
   WholesaleBenefitIcon,
@@ -100,10 +101,14 @@ export function WholesaleContent({
             key={item.label}
             className="flex flex-col items-center gap-1 text-center"
           >
-            <span className="font-sans text-xs tracking-[0.15em] text-foreground/50">
+            <span
+              className={`${notoSansKR.className} text-xs tracking-[0.15em] text-foreground/50`}
+            >
               {item.label}
             </span>
-            <span className="font-display text-xl font-medium text-primary sm:text-2xl">
+            <span
+              className={`${notoSansKR.className} text-xl font-medium text-primary sm:text-2xl`}
+            >
               {item.value}
             </span>
           </div>

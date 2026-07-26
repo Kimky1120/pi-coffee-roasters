@@ -16,7 +16,7 @@ const STATUS_LABEL: Record<CoffeeBean["status"], string> = {
 
 export function CoffeeCard({ bean }: { bean: CoffeeBean }) {
   const cardRef = useRef<HTMLAnchorElement>(null);
-  const isInView = useInView(cardRef, { amount: 0.55 });
+  const isInView = useInView(cardRef, { amount: 0.35 });
 
   return (
     <Link
@@ -29,7 +29,7 @@ export function CoffeeCard({ bean }: { bean: CoffeeBean }) {
         "hover:-translate-y-2 hover:border-transparent hover:shadow-xl hover:shadow-primary/15",
         "focus-visible:-translate-y-2 focus-visible:border-transparent focus-visible:shadow-xl focus-visible:shadow-primary/15",
         isInView &&
-          "max-sm:-translate-y-2 max-sm:border-transparent max-sm:shadow-xl max-sm:shadow-primary/15",
+          "max-md:-translate-y-2 max-md:border-transparent max-md:shadow-xl max-md:shadow-primary/15",
       )}
     >
       <Image
@@ -40,14 +40,14 @@ export function CoffeeCard({ bean }: { bean: CoffeeBean }) {
         className={cn(
           "object-cover scale-100 opacity-0 transition-[opacity,transform] duration-700 ease-out",
           "group-hover:scale-[1.06] group-hover:opacity-100 group-focus-visible:scale-[1.06] group-focus-visible:opacity-100",
-          isInView && "max-sm:scale-[1.06] max-sm:opacity-100",
+          isInView && "max-md:scale-[1.06] max-md:opacity-100",
         )}
       />
       <div
         className={cn(
           "absolute inset-0 bg-gradient-to-b from-black/40 via-black/35 to-black/75 opacity-0 transition-opacity duration-500",
           "group-hover:opacity-100 group-focus-visible:opacity-100",
-          isInView && "max-sm:opacity-100",
+          isInView && "max-md:opacity-100",
         )}
       />
 
@@ -55,7 +55,7 @@ export function CoffeeCard({ bean }: { bean: CoffeeBean }) {
         className={cn(
           "relative z-10 flex w-full flex-col gap-5 p-8 transition-opacity duration-300 sm:p-10",
           "group-hover:opacity-0 group-focus-visible:opacity-0",
-          isInView && "max-sm:opacity-0",
+          isInView && "max-md:opacity-0",
         )}
       >
         <div className="flex items-center justify-between">
@@ -132,7 +132,7 @@ export function CoffeeCard({ bean }: { bean: CoffeeBean }) {
         className={cn(
           "pointer-events-none absolute inset-0 z-20 flex translate-y-3 flex-col p-8 text-white opacity-0 transition-[opacity,transform] delay-75 duration-500 sm:p-10",
           "group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100",
-          isInView && "max-sm:translate-y-0 max-sm:opacity-100",
+          isInView && "max-md:translate-y-0 max-md:opacity-100",
         )}
       >
         <div className="flex flex-col gap-2">

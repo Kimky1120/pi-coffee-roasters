@@ -39,4 +39,9 @@ export const defaultMetadata: Metadata = {
       follow: true,
     },
   },
+  verification: {
+    other: {
+      "naver-site-verification": "9173bc6872cf8b04989d762159f9f1982e53fbb7",
+    },
+  },
 };

@@ -3,12 +3,33 @@
 import { useState } from "react";
 import Link from "next/link";
 import { PreparationNotice } from "./PreparationNotice";
+import { createClient } from "@/lib/supabase/client";
 
 type AuthMode = "login" | "signup";
 
 export function AuthForm({ mode }: { mode: AuthMode }) {
   const [showNotice, setShowNotice] = useState(false);
+  const [isKakaoLoading, setIsKakaoLoading] = useState(false);
+  const [kakaoError, setKakaoError] = useState<string | null>(null);
   const isLogin = mode === "login";
+
+  async function handleKakaoLogin() {
+    setKakaoError(null);
+    setIsKakaoLoading(true);
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "kakao",
+      options: {
+        redirectTo: "https://www.pi-coffeeroasters.com/auth/callback",
+      },
+    });
+
+    if (error) {
+      setKakaoError(error.message);
+      setIsKakaoLoading(false);
+    }
+  }
 
   return (
     <div className="w-full max-w-md">
@@ -97,6 +118,28 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           </PreparationNotice>
         )}
       </form>
+
+      <div className="mt-8 flex items-center gap-4 text-xs text-foreground/40">
+        <span className="h-px flex-1 bg-border" />
+        또는
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
+      <div className="mt-6">
+        <button
+          type="button"
+          onClick={handleKakaoLogin}
+          disabled={isKakaoLoading}
+          className="h-12 w-full rounded-full border border-border text-sm tracking-wide text-foreground transition-colors hover:border-primary disabled:opacity-50"
+        >
+          {isKakaoLoading ? "카카오 로그인 연결 중..." : "카카오로 로그인 (테스트)"}
+        </button>
+        {kakaoError && (
+          <p className="mt-3 text-center text-xs text-red-600">
+            {kakaoError}
+          </p>
+        )}
+      </div>
 
       <div className="mt-8 border-t border-border pt-6 text-center text-sm text-foreground/60">
         {isLogin ? "아직 회원이 아니신가요?" : "이미 회원이신가요?"}{" "}

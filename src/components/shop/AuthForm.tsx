@@ -22,6 +22,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
       provider: "kakao",
       options: {
         redirectTo: "https://www.pi-coffeeroasters.com/auth/callback",
+        scopes: "profile_nickname profile_image",
       },
     });
 

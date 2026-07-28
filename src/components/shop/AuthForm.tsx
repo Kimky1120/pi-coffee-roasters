@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PreparationNotice } from "./PreparationNotice";
 import { createClient } from "@/lib/supabase/client";
@@ -8,22 +9,60 @@ import { createClient } from "@/lib/supabase/client";
 type AuthMode = "login" | "signup";
 
 export function AuthForm({ mode }: { mode: AuthMode }) {
+  const router = useRouter();
   const [showNotice, setShowNotice] = useState(false);
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const [isKakaoLoading, setIsKakaoLoading] = useState(false);
   const [kakaoError, setKakaoError] = useState<string | null>(null);
   const isLogin = mode === "login";
+
+  async function handleLoginSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoginError(null);
+
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") ?? "");
+    const password = String(formData.get("password") ?? "");
+
+    setIsLoginLoading(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setLoginError(error.message);
+      setIsLoginLoading(false);
+      return;
+    }
+
+    router.push("/account");
+    router.refresh();
+  }
 
   async function handleKakaoLogin() {
     setKakaoError(null);
     setIsKakaoLoading(true);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "kakao",
+    const oauthRequest = {
+      provider: "kakao" as const,
       options: {
         redirectTo: "https://www.pi-coffeeroasters.com/auth/callback",
         scopes: "profile_nickname profile_image",
       },
+    };
+    // TEMP DEBUG: remove after account_email scope investigation is resolved
+    console.log("[kakao-oauth-debug] signInWithOAuth request:", oauthRequest);
+
+    const { data, error } = await supabase.auth.signInWithOAuth(oauthRequest);
+
+    // TEMP DEBUG: remove after account_email scope investigation is resolved
+    console.log("[kakao-oauth-debug] signInWithOAuth response:", {
+      data,
+      error,
     });
 
     if (error) {
@@ -41,19 +80,23 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         <h1 className="mt-3 font-display text-4xl font-medium tracking-tight text-primary sm:text-5xl">
           {isLogin ? "로그인" : "회원가입"}
         </h1>
-        <p className="mt-4 text-sm leading-relaxed text-foreground/60">
-          {isLogin
-            ? "회원 서비스는 현재 준비 중입니다."
-            : "회원가입 기능은 현재 준비 중입니다."}
-        </p>
+        {!isLogin && (
+          <p className="mt-4 text-sm leading-relaxed text-foreground/60">
+            회원가입 기능은 현재 준비 중입니다.
+          </p>
+        )}
       </div>
 
       <form
         className="flex flex-col gap-5"
-        onSubmit={(event) => {
-          event.preventDefault();
-          setShowNotice(true);
-        }}
+        onSubmit={
+          isLogin
+            ? handleLoginSubmit
+            : (event) => {
+                event.preventDefault();
+                setShowNotice(true);
+              }
+        }
       >
         <label className="flex flex-col gap-2 text-sm text-foreground/70">
           이메일
@@ -107,12 +150,17 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
         <button
           type="submit"
-          className="mt-2 h-12 rounded-full bg-primary px-6 text-sm tracking-wide text-background transition-colors hover:bg-primary/90"
+          disabled={isLogin && isLoginLoading}
+          className="mt-2 h-12 rounded-full bg-primary px-6 text-sm tracking-wide text-background transition-colors hover:bg-primary/90 disabled:opacity-50"
         >
-          {isLogin ? "로그인" : "가입하기"}
+          {isLogin ? (isLoginLoading ? "로그인 중..." : "로그인") : "가입하기"}
         </button>
 
-        {showNotice && (
+        {isLogin && loginError && (
+          <p className="text-center text-xs text-red-600">{loginError}</p>
+        )}
+
+        {!isLogin && showNotice && (
           <PreparationNotice>
             아직 실제 회원 정보는 전송되거나 저장되지 않습니다. 회원 서비스가
             준비되면 이용하실 수 있습니다.

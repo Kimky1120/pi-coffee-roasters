@@ -10,9 +10,11 @@ type AuthMode = "login" | "signup";
 
 export function AuthForm({ mode }: { mode: AuthMode }) {
   const router = useRouter();
-  const [showNotice, setShowNotice] = useState(false);
   const [isLoginLoading, setIsLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [isSignupLoading, setIsSignupLoading] = useState(false);
+  const [signupError, setSignupError] = useState<string | null>(null);
+  const [signupSuccess, setSignupSuccess] = useState(false);
   const [isKakaoLoading, setIsKakaoLoading] = useState(false);
   const [kakaoError, setKakaoError] = useState<string | null>(null);
   const isLogin = mode === "login";
@@ -40,6 +42,59 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
     router.push("/account");
     router.refresh();
+  }
+
+  async function handleSignupSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSignupError(null);
+    setSignupSuccess(false);
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const email = String(formData.get("email") ?? "");
+    const password = String(formData.get("password") ?? "");
+    const passwordConfirm = String(formData.get("password-confirm") ?? "");
+    const nickname = String(formData.get("nickname") ?? "");
+    const phone = String(formData.get("phone") ?? "");
+    const birth = String(formData.get("birth") ?? "");
+    const marketingAgree = formData.get("marketing_agree") === "on";
+
+    if (password !== passwordConfirm) {
+      setSignupError("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    setIsSignupLoading(true);
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          phone,
+          nickname,
+          birth: birth || null,
+          marketing_agree: marketingAgree,
+        },
+      },
+    });
+
+    if (error) {
+      setSignupError(error.message);
+      setIsSignupLoading(false);
+      return;
+    }
+
+    setIsSignupLoading(false);
+
+    if (data.session) {
+      router.push("/account");
+      router.refresh();
+      return;
+    }
+
+    setSignupSuccess(true);
+    form.reset();
   }
 
   async function handleKakaoLogin() {
@@ -71,6 +126,15 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     }
   }
 
+  const isSubmitting = isLogin ? isLoginLoading : isSignupLoading;
+  const submitLabel = isLogin
+    ? isLoginLoading
+      ? "로그인 중..."
+      : "로그인"
+    : isSignupLoading
+      ? "가입 중..."
+      : "가입하기";
+
   return (
     <div className="w-full max-w-md">
       <div className="mb-10 text-center">
@@ -80,23 +144,11 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         <h1 className="mt-3 font-display text-4xl font-medium tracking-tight text-primary sm:text-5xl">
           {isLogin ? "로그인" : "회원가입"}
         </h1>
-        {!isLogin && (
-          <p className="mt-4 text-sm leading-relaxed text-foreground/60">
-            회원가입 기능은 현재 준비 중입니다.
-          </p>
-        )}
       </div>
 
       <form
         className="flex flex-col gap-5"
-        onSubmit={
-          isLogin
-            ? handleLoginSubmit
-            : (event) => {
-                event.preventDefault();
-                setShowNotice(true);
-              }
-        }
+        onSubmit={isLogin ? handleLoginSubmit : handleSignupSubmit}
       >
         <label className="flex flex-col gap-2 text-sm text-foreground/70">
           이메일
@@ -137,6 +189,50 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                 className="h-12 rounded-sm border border-border bg-background px-4 text-base text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary"
               />
             </label>
+
+            <label className="flex flex-col gap-2 text-sm text-foreground/70">
+              닉네임
+              <input
+                type="text"
+                name="nickname"
+                autoComplete="nickname"
+                required
+                placeholder="사용하실 닉네임을 입력해 주세요"
+                className="h-12 rounded-sm border border-border bg-background px-4 text-base text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary"
+              />
+            </label>
+
+            <label className="flex flex-col gap-2 text-sm text-foreground/70">
+              휴대폰 번호
+              <input
+                type="tel"
+                name="phone"
+                autoComplete="tel"
+                required
+                placeholder="010-0000-0000"
+                className="h-12 rounded-sm border border-border bg-background px-4 text-base text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary"
+              />
+            </label>
+
+            <label className="flex flex-col gap-2 text-sm text-foreground/70">
+              생년월일
+              <input
+                type="date"
+                name="birth"
+                autoComplete="bday"
+                className="h-12 rounded-sm border border-border bg-background px-4 text-base text-foreground outline-none transition-colors focus:border-primary"
+              />
+            </label>
+
+            <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-foreground/65">
+              <input
+                type="checkbox"
+                name="marketing_agree"
+                className="mt-1 h-4 w-4 accent-primary"
+              />
+              마케팅 정보 수신에 동의합니다. (선택)
+            </label>
+
             <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-foreground/65">
               <input
                 type="checkbox"
@@ -150,20 +246,24 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
         <button
           type="submit"
-          disabled={isLogin && isLoginLoading}
+          disabled={isSubmitting}
           className="mt-2 h-12 rounded-full bg-primary px-6 text-sm tracking-wide text-background transition-colors hover:bg-primary/90 disabled:opacity-50"
         >
-          {isLogin ? (isLoginLoading ? "로그인 중..." : "로그인") : "가입하기"}
+          {submitLabel}
         </button>
 
         {isLogin && loginError && (
           <p className="text-center text-xs text-red-600">{loginError}</p>
         )}
 
-        {!isLogin && showNotice && (
+        {!isLogin && signupError && (
+          <p className="text-center text-xs text-red-600">{signupError}</p>
+        )}
+
+        {!isLogin && signupSuccess && (
           <PreparationNotice>
-            아직 실제 회원 정보는 전송되거나 저장되지 않습니다. 회원 서비스가
-            준비되면 이용하실 수 있습니다.
+            가입 확인 이메일을 보내드렸습니다. 메일함에서 인증 링크를
+            확인해 주세요.
           </PreparationNotice>
         )}
       </form>

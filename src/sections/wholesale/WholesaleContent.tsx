@@ -60,7 +60,7 @@ export function WholesaleContent({
       <SectionIntro
         eyebrow="05 — Wholesale"
         title="Wholesale"
-        description="카페, 레스토랑, 오피스를 위한 스페셜티 커피 납품 파트너. 안정적인 품질과 공급으로 매장의 한 잔을 지켜드립니다."
+        description="매장에 어울리는 원두를 고르고, 매일 같은 맛을 낼 수 있는 기준까지 함께 만듭니다."
       />
 
       <motion.div
@@ -119,9 +119,16 @@ export function WholesaleContent({
         {...fadeUp}
         className="flex flex-col items-center gap-8 text-center"
       >
-        <p className="font-sans text-base text-foreground/70 sm:text-lg">
-          지금 문의하고 매장에 맞는 원두를 상담받아 보세요.
-        </p>
+        <div className="flex max-w-2xl flex-col gap-3">
+          <h3 className="font-display text-xl font-medium tracking-tight text-primary sm:text-2xl">
+            매장마다 필요한 커피는 다릅니다.
+          </h3>
+          <p className="font-sans text-sm leading-relaxed text-foreground/70 sm:text-base">
+            공간의 분위기와 주력 메뉴, 사용하는 장비를 살펴 원두와 추출
+            방향을 제안합니다. 새로 문을 여는 매장은 첫 세팅부터, 운영 중인
+            매장은 지금의 고민부터 들려주세요.
+          </p>
+        </div>
         <Button href="#contact" variant="primary">
           납품 문의하기
         </Button>

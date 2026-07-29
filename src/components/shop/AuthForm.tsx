@@ -1,14 +1,100 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { PreparationNotice } from "./PreparationNotice";
+import { useRouter } from "next/navigation";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type AuthMode = "login" | "signup";
 
+function getAuthErrorMessage(message: string): string {
+  if (message.includes("Invalid login credentials")) {
+    return "이메일 또는 비밀번호를 다시 확인해 주세요.";
+  }
+  if (message.includes("Email not confirmed")) {
+    return "이메일 인증을 완료한 뒤 로그인해 주세요.";
+  }
+  if (message.includes("User already registered")) {
+    return "이미 가입된 이메일입니다. 로그인해 주세요.";
+  }
+  if (message.toLowerCase().includes("password")) {
+    return "비밀번호는 8자 이상 입력해 주세요.";
+  }
+  return "잠시 후 다시 시도해 주세요.";
+}
+
 export function AuthForm({ mode }: { mode: AuthMode }) {
-  const [showNotice, setShowNotice] = useState(false);
+  const router = useRouter();
+  const [message, setMessage] = useState<string | null>(null);
+  const [isError, setIsError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isLogin = mode === "login";
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage(null);
+    setIsError(false);
+
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+    const passwordConfirm = String(formData.get("password-confirm") ?? "");
+
+    if (!isLogin && password !== passwordConfirm) {
+      setIsError(true);
+      setMessage("비밀번호가 서로 일치하지 않습니다.");
+      return;
+    }
+
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) {
+      setIsError(true);
+      setMessage("회원 서비스를 연결하는 중입니다. 잠시 후 다시 시도해 주세요.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      if (isLogin) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) {
+          setIsError(true);
+          setMessage(getAuthErrorMessage(error.message));
+          return;
+        }
+
+        router.replace("/");
+        router.refresh();
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+        },
+      });
+
+      if (error) {
+        setIsError(true);
+        setMessage(getAuthErrorMessage(error.message));
+        return;
+      }
+
+      router.replace(
+        data.session ? "/?auth=signup-complete" : "/?auth=check-email",
+      );
+      router.refresh();
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <div className="w-full max-w-md">
@@ -21,18 +107,12 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         </h1>
         <p className="mt-4 text-sm leading-relaxed text-foreground/60">
           {isLogin
-            ? "회원 서비스는 현재 준비 중입니다."
-            : "회원가입 기능은 현재 준비 중입니다."}
+            ? "가입한 이메일과 비밀번호로 로그인해 주세요."
+            : "회원이 되어 PI Coffee의 새로운 소식을 받아보세요."}
         </p>
       </div>
 
-      <form
-        className="flex flex-col gap-5"
-        onSubmit={(event) => {
-          event.preventDefault();
-          setShowNotice(true);
-        }}
-      >
+      <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
         <label className="flex flex-col gap-2 text-sm text-foreground/70">
           이메일
           <input
@@ -85,18 +165,54 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
         <button
           type="submit"
-          className="mt-2 h-12 rounded-full bg-primary px-6 text-sm tracking-wide text-background transition-colors hover:bg-primary/90"
+          disabled={isSubmitting}
+          className="mt-2 h-12 rounded-full bg-primary px-6 text-sm tracking-wide text-background transition-colors hover:bg-primary/90 disabled:cursor-wait disabled:opacity-60"
         >
-          {isLogin ? "로그인" : "가입하기"}
+          {isSubmitting ? "처리 중..." : isLogin ? "로그인" : "가입하기"}
         </button>
 
-        {showNotice && (
-          <PreparationNotice>
-            아직 실제 회원 정보는 전송되거나 저장되지 않습니다. 회원 서비스가
-            준비되면 이용하실 수 있습니다.
-          </PreparationNotice>
+        {message && (
+          <p
+            role={isError ? "alert" : "status"}
+            className={`rounded-sm border px-4 py-3 text-sm leading-relaxed ${
+              isError
+                ? "border-red-900/20 bg-red-950/5 text-red-900"
+                : "border-primary/15 bg-primary/5 text-primary"
+            }`}
+          >
+            {message}
+          </p>
         )}
       </form>
+
+      <div className="mt-8">
+        <div className="flex items-center gap-3">
+          <span className="h-px flex-1 bg-border" />
+          <span className="text-xs tracking-[0.15em] text-foreground/40">
+            간편 로그인
+          </span>
+          <span className="h-px flex-1 bg-border" />
+        </div>
+        <div className="mt-5 grid gap-3">
+          <button
+            type="button"
+            disabled
+            className="h-12 rounded-full bg-[#FEE500] px-6 text-sm font-medium text-[#191919] opacity-60"
+          >
+            카카오로 시작하기 · 준비 중
+          </button>
+          <button
+            type="button"
+            disabled
+            className="h-12 rounded-full bg-[#03C75A] px-6 text-sm font-medium text-white opacity-60"
+          >
+            네이버로 시작하기 · 준비 중
+          </button>
+        </div>
+        <p className="mt-3 text-center text-xs leading-relaxed text-foreground/45">
+          간편 로그인은 서비스 승인 후 순차적으로 제공됩니다.
+        </p>
+      </div>
 
       <div className="mt-8 border-t border-border pt-6 text-center text-sm text-foreground/60">
         {isLogin ? "아직 회원이 아니신가요?" : "이미 회원이신가요?"}{" "}

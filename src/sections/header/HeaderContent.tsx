@@ -3,20 +3,23 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Menu, ShoppingBag, UserRound, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { LogOut, Menu, ShoppingBag, UserRound, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { NAV_ITEMS } from "@/constants/nav";
 import { SITE_CONFIG } from "@/constants/site";
 import { DURATION, EASE } from "@/lib/motion";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils/cn";
 
 const SCROLL_THRESHOLD = 32;
 
 export function HeaderContent() {
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const solidHeader = pathname !== "/" || scrolled || menuOpen;
 
@@ -25,6 +28,23 @@ export function HeaderContent() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+
+    void supabase.auth.getSession().then(({ data }) => {
+      setIsAuthenticated(Boolean(data.session));
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(Boolean(session));
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -43,6 +63,16 @@ export function HeaderContent() {
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [menuOpen]);
+
+  async function handleLogout() {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+
+    await supabase.auth.signOut();
+    setMenuOpen(false);
+    router.replace("/?auth=logged-out");
+    router.refresh();
+  }
 
   return (
     <header
@@ -87,17 +117,31 @@ export function HeaderContent() {
         </nav>
 
         <div className="flex items-center gap-1">
-          <Link
-            href="/login"
-            onClick={() => setMenuOpen(false)}
-            aria-label="로그인 및 회원가입"
-            className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300 ease-out hover:bg-primary/10",
-              solidHeader ? "text-primary" : "text-background",
-            )}
-          >
-            <UserRound className="h-[19px] w-[19px]" aria-hidden />
-          </Link>
+          {isAuthenticated ? (
+            <button
+              type="button"
+              onClick={handleLogout}
+              aria-label="로그아웃"
+              className={cn(
+                "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300 ease-out hover:bg-primary/10",
+                solidHeader ? "text-primary" : "text-background",
+              )}
+            >
+              <LogOut className="h-[19px] w-[19px]" aria-hidden />
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              onClick={() => setMenuOpen(false)}
+              aria-label="로그인 및 회원가입"
+              className={cn(
+                "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300 ease-out hover:bg-primary/10",
+                solidHeader ? "text-primary" : "text-background",
+              )}
+            >
+              <UserRound className="h-[19px] w-[19px]" aria-hidden />
+            </Link>
+          )}
           <Link
             href="/cart"
             onClick={() => setMenuOpen(false)}
@@ -173,14 +217,25 @@ export function HeaderContent() {
               </ul>
 
               <div className="mt-auto grid grid-cols-2 gap-3 pt-8">
-                <Link
-                  href="/login"
-                  onClick={() => setMenuOpen(false)}
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/20 px-4 py-3 text-sm text-primary"
-                >
-                  <UserRound className="h-4 w-4" aria-hidden />
-                  로그인
-                </Link>
+                {isAuthenticated ? (
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/20 px-4 py-3 text-sm text-primary"
+                  >
+                    <LogOut className="h-4 w-4" aria-hidden />
+                    로그아웃
+                  </button>
+                ) : (
+                  <Link
+                    href="/login"
+                    onClick={() => setMenuOpen(false)}
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/20 px-4 py-3 text-sm text-primary"
+                  >
+                    <UserRound className="h-4 w-4" aria-hidden />
+                    로그인
+                  </Link>
+                )}
                 <Link
                   href="/cart"
                   onClick={() => setMenuOpen(false)}

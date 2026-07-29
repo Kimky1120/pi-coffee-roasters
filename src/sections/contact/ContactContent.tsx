@@ -2,7 +2,6 @@
 
 import { AtSign, Mail, Map, MapPin, Phone, type LucideIcon } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Button } from "@/components/ui/Button";
 import { SectionIntro } from "@/components/ui/SectionIntro";
 import { DURATION, EASE, OFFSET } from "@/lib/motion";
 import type { ContactChannel, ContactChannelKey, ContactInfo } from "@/types/contact";
@@ -37,16 +36,6 @@ function getChannelDisplayValue(
   if (key === "naverMapUrl") return "map.naver.com";
   if (key === "googleMapUrl") return "google.com";
   return value;
-}
-
-function buildInquiryHref(contact: ContactInfo, subject: string): string | undefined {
-  if (contact.email) {
-    return `mailto:${contact.email}?subject=${encodeURIComponent(subject)}`;
-  }
-  if (contact.phone) {
-    return `tel:${contact.phone}`;
-  }
-  return undefined;
 }
 
 export function ContactContent({
@@ -120,29 +109,30 @@ export function ContactContent({
 
         <motion.div
           {...fadeUp}
-          className="flex flex-col justify-center gap-8 rounded-sm border border-border bg-surface p-8 sm:p-10"
+          className="flex flex-col justify-center gap-7 rounded-sm border border-border bg-surface p-8 sm:p-10"
         >
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
+            <span className="font-sans text-xs tracking-[0.16em] text-foreground/50">
+              PI COFFEE WHOLESALE
+            </span>
             <h3 className="font-display text-xl font-medium tracking-tight text-primary sm:text-2xl">
-              문의하기
+              커피가 매장의 인상이 되도록
             </h3>
             <p className="font-sans text-sm leading-relaxed text-foreground/70">
-              납품과 원두 상담, 무엇이든 편하게 문의해 주세요.
+              공간의 분위기와 주력 메뉴, 사용하는 장비를 살펴 매장에 어울리는
+              원두와 추출 방향을 제안합니다. 새로 문을 여는 매장은 첫 세팅부터,
+              운영 중인 매장은 지금의 고민부터 함께 이야기합니다.
             </p>
           </div>
-          <div className="flex flex-wrap gap-4">
-            <Button
-              href={buildInquiryHref(contact, "납품 문의")}
-              variant="primary"
-            >
-              납품 문의
-            </Button>
-            <Button
-              href={buildInquiryHref(contact, "원두 상담")}
-              variant="outline-primary"
-            >
-              원두 상담
-            </Button>
+          <div className="grid grid-cols-1 border-y border-border sm:grid-cols-3">
+            {["원두 셀렉션", "메뉴 밸런스", "추출 기준 세팅"].map((item) => (
+              <span
+                key={item}
+                className="border-b border-border py-3 font-sans text-sm text-primary last:border-b-0 sm:border-r sm:border-b-0 sm:px-3 sm:text-center sm:last:border-r-0"
+              >
+                {item}
+              </span>
+            ))}
           </div>
         </motion.div>
       </div>

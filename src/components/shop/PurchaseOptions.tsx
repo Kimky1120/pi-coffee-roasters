@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { Minus, Plus, ShoppingBag } from "lucide-react";
 import {
   formatPrice,
@@ -9,6 +10,7 @@ import {
   type GrindOption,
   type ProductWeight,
 } from "@/data/shop";
+import { addCartItem } from "@/lib/cart";
 import { PreparationNotice } from "./PreparationNotice";
 
 export function PurchaseOptions({
@@ -23,7 +25,9 @@ export function PurchaseOptions({
   const [weight, setWeight] = useState<ProductWeight>(weightOptions[0]);
   const [grind, setGrind] = useState<GrindOption>("홀빈");
   const [quantity, setQuantity] = useState(1);
-  const [showNotice, setShowNotice] = useState(false);
+  const [cartStatus, setCartStatus] = useState<"success" | "error" | null>(
+    null,
+  );
 
   const price = useMemo(() => prices[weight] ?? 0, [prices, weight]);
 
@@ -58,7 +62,7 @@ export function PurchaseOptions({
                   type="button"
                   onClick={() => {
                     setWeight(option);
-                    setShowNotice(false);
+                    setCartStatus(null);
                   }}
                   aria-pressed={weight === option}
                   className={`h-11 rounded-sm border text-sm transition-colors ${
@@ -79,7 +83,7 @@ export function PurchaseOptions({
               value={grind}
               onChange={(event) => {
                 setGrind(event.target.value as GrindOption);
-                setShowNotice(false);
+                setCartStatus(null);
               }}
               className="h-12 rounded-sm border border-border bg-background px-4 text-sm font-normal text-foreground outline-none transition-colors focus:border-primary"
             >
@@ -138,17 +142,36 @@ export function PurchaseOptions({
 
           <button
             type="button"
-            onClick={() => setShowNotice(true)}
+            onClick={() => {
+              const saved = addCartItem({
+                productSlug,
+                weight,
+                grind,
+                quantity,
+              });
+              setCartStatus(saved ? "success" : "error");
+            }}
             className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm tracking-wide text-background transition-colors hover:bg-primary/90"
           >
             <ShoppingBag className="h-4 w-4" aria-hidden />
             장바구니 담기
           </button>
 
-          {showNotice && (
+          {cartStatus === "success" && (
             <PreparationNotice>
-              장바구니 기능은 준비 중입니다. 선택하신 {weight} · {grind} 옵션은
-              저장되지 않습니다.
+              선택하신 {weight} · {grind} 옵션을 장바구니에 담았습니다.{" "}
+              <Link
+                href="/cart"
+                className="font-medium text-primary underline underline-offset-4"
+              >
+                장바구니 보기
+              </Link>
+            </PreparationNotice>
+          )}
+          {cartStatus === "error" && (
+            <PreparationNotice>
+              장바구니에 저장하지 못했습니다. 브라우저 설정을 확인한 뒤 다시
+              시도해 주세요.
             </PreparationNotice>
           )}
         </div>

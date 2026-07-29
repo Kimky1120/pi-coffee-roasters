@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -10,6 +10,12 @@ import type { User } from "@supabase/supabase-js";
 import { NAV_ITEMS } from "@/constants/nav";
 import { SITE_CONFIG } from "@/constants/site";
 import { DURATION, EASE } from "@/lib/motion";
+import {
+  getCartItemCount,
+  getCartSnapshot,
+  getServerCartSnapshot,
+  subscribeCart,
+} from "@/lib/cart";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils/cn";
 
@@ -23,6 +29,12 @@ export function HeaderContent() {
   const [user, setUser] = useState<User | null>(null);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
+  const cartItems = useSyncExternalStore(
+    subscribeCart,
+    getCartSnapshot,
+    getServerCartSnapshot,
+  );
+  const cartCount = getCartItemCount(cartItems);
   const shouldReduceMotion = useReducedMotion();
   const solidHeader =
     pathname !== "/" || scrolled || menuOpen || accountMenuOpen;
@@ -209,13 +221,18 @@ export function HeaderContent() {
           <Link
             href="/cart"
             onClick={() => setMenuOpen(false)}
-            aria-label="장바구니"
+            aria-label={`장바구니${cartCount > 0 ? `, 상품 ${cartCount}개` : ""}`}
             className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300 ease-out hover:bg-primary/10",
+              "relative flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300 ease-out hover:bg-primary/10",
               solidHeader ? "text-primary" : "text-background",
             )}
           >
             <ShoppingBag className="h-[19px] w-[19px]" aria-hidden />
+            {cartCount > 0 && (
+              <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-medium leading-none text-background">
+                {cartCount > 99 ? "99+" : cartCount}
+              </span>
+            )}
           </Link>
           <button
             type="button"
@@ -308,7 +325,7 @@ export function HeaderContent() {
                       className="col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-3 text-sm text-background"
                     >
                       <ShoppingBag className="h-4 w-4" aria-hidden />
-                      장바구니
+                      장바구니{cartCount > 0 ? ` (${cartCount})` : ""}
                     </Link>
                   </>
                 ) : (
@@ -327,7 +344,7 @@ export function HeaderContent() {
                       className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-3 text-sm text-background"
                     >
                       <ShoppingBag className="h-4 w-4" aria-hidden />
-                      장바구니
+                      장바구니{cartCount > 0 ? ` (${cartCount})` : ""}
                     </Link>
                   </>
                 )}

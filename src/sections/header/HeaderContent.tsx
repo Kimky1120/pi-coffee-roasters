@@ -1,22 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Menu, ShoppingBag, UserRound, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { LogOut, Menu, ShoppingBag, UserRound, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import type { User } from "@supabase/supabase-js";
 import { NAV_ITEMS } from "@/constants/nav";
 import { SITE_CONFIG } from "@/constants/site";
 import { DURATION, EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils/cn";
+import { createClient } from "@/lib/supabase/client";
 
 const SCROLL_THRESHOLD = 32;
 
 export function HeaderContent() {
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
   const solidHeader = pathname !== "/" || scrolled || menuOpen;
 
@@ -26,6 +32,49 @@ export function HeaderContent() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!accountMenuOpen) return;
+
+    const onClickOutside = (event: MouseEvent) => {
+      if (!accountMenuRef.current?.contains(event.target as Node)) {
+        setAccountMenuOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setAccountMenuOpen(false);
+    };
+
+    window.addEventListener("mousedown", onClickOutside);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("mousedown", onClickOutside);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [accountMenuOpen]);
+
+  async function handleSignOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setAccountMenuOpen(false);
+    setMenuOpen(false);
+    router.push("/");
+    router.refresh();
+  }
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -87,17 +136,70 @@ export function HeaderContent() {
         </nav>
 
         <div className="flex items-center gap-1">
-          <Link
-            href="/login"
-            onClick={() => setMenuOpen(false)}
-            aria-label="로그인 및 회원가입"
-            className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300 ease-out hover:bg-primary/10",
-              solidHeader ? "text-primary" : "text-background",
-            )}
-          >
-            <UserRound className="h-[19px] w-[19px]" aria-hidden />
-          </Link>
+          {user ? (
+            <div className="relative" ref={accountMenuRef}>
+              <button
+                type="button"
+                onClick={() => setAccountMenuOpen((open) => !open)}
+                aria-haspopup="menu"
+                aria-expanded={accountMenuOpen}
+                aria-label="마이페이지 및 로그아웃"
+                className={cn(
+                  "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300 ease-out hover:bg-primary/10",
+                  solidHeader ? "text-primary" : "text-background",
+                )}
+              >
+                <UserRound className="h-[19px] w-[19px]" aria-hidden />
+              </button>
+
+              <AnimatePresence>
+                {accountMenuOpen && (
+                  <motion.div
+                    role="menu"
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{
+                      duration: shouldReduceMotion ? 0 : DURATION.item,
+                      ease: EASE,
+                    }}
+                    className="absolute right-0 top-12 w-40 overflow-hidden rounded-sm border border-border bg-background"
+                  >
+                    <Link
+                      href="/account"
+                      role="menuitem"
+                      onClick={() => setAccountMenuOpen(false)}
+                      className="flex items-center gap-2 px-4 py-3 text-sm text-foreground/70 transition-colors duration-300 ease-out hover:bg-primary/10 hover:text-primary"
+                    >
+                      <UserRound className="h-4 w-4" aria-hidden />
+                      마이페이지
+                    </Link>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={handleSignOut}
+                      className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-foreground/70 transition-colors duration-300 ease-out hover:bg-primary/10 hover:text-primary"
+                    >
+                      <LogOut className="h-4 w-4" aria-hidden />
+                      로그아웃
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              onClick={() => setMenuOpen(false)}
+              aria-label="로그인 및 회원가입"
+              className={cn(
+                "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300 ease-out hover:bg-primary/10",
+                solidHeader ? "text-primary" : "text-background",
+              )}
+            >
+              <UserRound className="h-[19px] w-[19px]" aria-hidden />
+            </Link>
+          )}
           <Link
             href="/cart"
             onClick={() => setMenuOpen(false)}
@@ -174,12 +276,12 @@ export function HeaderContent() {
 
               <div className="mt-auto grid grid-cols-2 gap-3 pt-8">
                 <Link
-                  href="/login"
+                  href={user ? "/account" : "/login"}
                   onClick={() => setMenuOpen(false)}
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/20 px-4 py-3 text-sm text-primary"
                 >
                   <UserRound className="h-4 w-4" aria-hidden />
-                  로그인
+                  {user ? "마이페이지" : "로그인"}
                 </Link>
                 <Link
                   href="/cart"

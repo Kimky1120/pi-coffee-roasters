@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut, Menu, ShoppingBag, UserRound, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import type { User } from "@supabase/supabase-js";
 import { NAV_ITEMS } from "@/constants/nav";
 import { SITE_CONFIG } from "@/constants/site";
 import { DURATION, EASE } from "@/lib/motion";
@@ -19,9 +20,12 @@ export function HeaderContent() {
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
-  const solidHeader = pathname !== "/" || scrolled || menuOpen;
+  const solidHeader =
+    pathname !== "/" || scrolled || menuOpen || accountMenuOpen;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > SCROLL_THRESHOLD);
@@ -34,18 +38,36 @@ export function HeaderContent() {
     const supabase = getSupabaseBrowserClient();
     if (!supabase) return;
 
-    void supabase.auth.getSession().then(({ data }) => {
-      setIsAuthenticated(Boolean(data.session));
-    });
+    void supabase.auth.getUser().then(({ data }) => setUser(data.user));
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(Boolean(session));
+      setUser(session?.user ?? null);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!accountMenuOpen) return;
+
+    const onClickOutside = (event: MouseEvent) => {
+      if (!accountMenuRef.current?.contains(event.target as Node)) {
+        setAccountMenuOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setAccountMenuOpen(false);
+    };
+
+    window.addEventListener("mousedown", onClickOutside);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("mousedown", onClickOutside);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [accountMenuOpen]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -64,11 +86,14 @@ export function HeaderContent() {
     };
   }, [menuOpen]);
 
-  async function handleLogout() {
+  async function handleSignOut() {
     const supabase = getSupabaseBrowserClient();
     if (!supabase) return;
 
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) return;
+
+    setAccountMenuOpen(false);
     setMenuOpen(false);
     router.replace("/?auth=logged-out");
     router.refresh();
@@ -117,18 +142,57 @@ export function HeaderContent() {
         </nav>
 
         <div className="flex items-center gap-1">
-          {isAuthenticated ? (
-            <button
-              type="button"
-              onClick={handleLogout}
-              aria-label="로그아웃"
-              className={cn(
-                "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300 ease-out hover:bg-primary/10",
-                solidHeader ? "text-primary" : "text-background",
-              )}
-            >
-              <LogOut className="h-[19px] w-[19px]" aria-hidden />
-            </button>
+          {user ? (
+            <div className="relative" ref={accountMenuRef}>
+              <button
+                type="button"
+                onClick={() => setAccountMenuOpen((open) => !open)}
+                aria-haspopup="menu"
+                aria-expanded={accountMenuOpen}
+                aria-label="마이페이지 및 로그아웃"
+                className={cn(
+                  "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300 ease-out hover:bg-primary/10",
+                  solidHeader ? "text-primary" : "text-background",
+                )}
+              >
+                <UserRound className="h-[19px] w-[19px]" aria-hidden />
+              </button>
+
+              <AnimatePresence>
+                {accountMenuOpen && (
+                  <motion.div
+                    role="menu"
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{
+                      duration: shouldReduceMotion ? 0 : DURATION.item,
+                      ease: EASE,
+                    }}
+                    className="absolute right-0 top-12 w-40 overflow-hidden rounded-sm border border-border bg-background"
+                  >
+                    <Link
+                      href="/account"
+                      role="menuitem"
+                      onClick={() => setAccountMenuOpen(false)}
+                      className="flex items-center gap-2 px-4 py-3 text-sm text-foreground/70 transition-colors duration-300 ease-out hover:bg-primary/10 hover:text-primary"
+                    >
+                      <UserRound className="h-4 w-4" aria-hidden />
+                      마이페이지
+                    </Link>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={handleSignOut}
+                      className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-foreground/70 transition-colors duration-300 ease-out hover:bg-primary/10 hover:text-primary"
+                    >
+                      <LogOut className="h-4 w-4" aria-hidden />
+                      로그아웃
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           ) : (
             <Link
               href="/login"
@@ -155,7 +219,10 @@ export function HeaderContent() {
           </Link>
           <button
             type="button"
-            onClick={() => setMenuOpen((open) => !open)}
+            onClick={() => {
+              setAccountMenuOpen(false);
+              setMenuOpen((open) => !open);
+            }}
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
             aria-label={menuOpen ? "메뉴 닫기" : "메뉴 열기"}
@@ -217,33 +284,53 @@ export function HeaderContent() {
               </ul>
 
               <div className="mt-auto grid grid-cols-2 gap-3 pt-8">
-                {isAuthenticated ? (
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/20 px-4 py-3 text-sm text-primary"
-                  >
-                    <LogOut className="h-4 w-4" aria-hidden />
-                    로그아웃
-                  </button>
+                {user ? (
+                  <>
+                    <Link
+                      href="/account"
+                      onClick={() => setMenuOpen(false)}
+                      className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/20 px-4 py-3 text-sm text-primary"
+                    >
+                      <UserRound className="h-4 w-4" aria-hidden />
+                      마이페이지
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/20 px-4 py-3 text-sm text-primary"
+                    >
+                      <LogOut className="h-4 w-4" aria-hidden />
+                      로그아웃
+                    </button>
+                    <Link
+                      href="/cart"
+                      onClick={() => setMenuOpen(false)}
+                      className="col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-3 text-sm text-background"
+                    >
+                      <ShoppingBag className="h-4 w-4" aria-hidden />
+                      장바구니
+                    </Link>
+                  </>
                 ) : (
-                  <Link
-                    href="/login"
-                    onClick={() => setMenuOpen(false)}
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/20 px-4 py-3 text-sm text-primary"
-                  >
-                    <UserRound className="h-4 w-4" aria-hidden />
-                    로그인
-                  </Link>
+                  <>
+                    <Link
+                      href="/login"
+                      onClick={() => setMenuOpen(false)}
+                      className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/20 px-4 py-3 text-sm text-primary"
+                    >
+                      <UserRound className="h-4 w-4" aria-hidden />
+                      로그인
+                    </Link>
+                    <Link
+                      href="/cart"
+                      onClick={() => setMenuOpen(false)}
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-3 text-sm text-background"
+                    >
+                      <ShoppingBag className="h-4 w-4" aria-hidden />
+                      장바구니
+                    </Link>
+                  </>
                 )}
-                <Link
-                  href="/cart"
-                  onClick={() => setMenuOpen(false)}
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-3 text-sm text-background"
-                >
-                  <ShoppingBag className="h-4 w-4" aria-hidden />
-                  장바구니
-                </Link>
               </div>
             </nav>
           </motion.div>

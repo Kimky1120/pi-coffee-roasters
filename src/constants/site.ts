@@ -2,7 +2,7 @@
  * 실제 도메인이 확정되면 NEXT_PUBLIC_SITE_URL 환경변수로 덮어쓴다.
  */
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://picoffeeroasters.com";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://pi-coffeeroasters.com";
 
 export const SITE_CONFIG = {
   name: "PI Coffee Roasters",

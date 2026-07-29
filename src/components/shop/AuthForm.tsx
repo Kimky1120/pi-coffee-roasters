@@ -7,6 +7,8 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type AuthMode = "login" | "signup";
 
+const KAKAO_LOGIN_ENABLED = false;
+
 function getAuthErrorMessage(message: string): string {
   if (message.includes("Invalid login credentials")) {
     return "이메일 또는 비밀번호를 다시 확인해 주세요.";
@@ -28,6 +30,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   const [message, setMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isKakaoLoading, setIsKakaoLoading] = useState(false);
   const isLogin = mode === "login";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -39,6 +42,10 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     const email = String(formData.get("email") ?? "").trim();
     const password = String(formData.get("password") ?? "");
     const passwordConfirm = String(formData.get("password-confirm") ?? "");
+    const nickname = String(formData.get("nickname") ?? "").trim();
+    const phone = String(formData.get("phone") ?? "").trim();
+    const birth = String(formData.get("birth") ?? "");
+    const marketingAgree = formData.get("marketing_agree") === "on";
 
     if (!isLogin && password !== passwordConfirm) {
       setIsError(true);
@@ -77,7 +84,13 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/`,
+          data: {
+            phone,
+            nickname,
+            birth: birth || null,
+            marketing_agree: marketingAgree,
+          },
         },
       });
 
@@ -93,6 +106,35 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
       router.refresh();
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  async function handleKakaoLogin() {
+    if (!KAKAO_LOGIN_ENABLED) return;
+
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) {
+      setIsError(true);
+      setMessage("회원 서비스를 연결하는 중입니다. 잠시 후 다시 시도해 주세요.");
+      return;
+    }
+
+    setMessage(null);
+    setIsError(false);
+    setIsKakaoLoading(true);
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "kakao",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=/`,
+        scopes: "profile_nickname profile_image",
+      },
+    });
+
+    if (error) {
+      setIsError(true);
+      setMessage(getAuthErrorMessage(error.message));
+      setIsKakaoLoading(false);
     }
   }
 
@@ -152,6 +194,50 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                 className="h-12 rounded-sm border border-border bg-background px-4 text-base text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary"
               />
             </label>
+
+            <label className="flex flex-col gap-2 text-sm text-foreground/70">
+              닉네임
+              <input
+                type="text"
+                name="nickname"
+                autoComplete="nickname"
+                required
+                placeholder="사용하실 닉네임을 입력해 주세요"
+                className="h-12 rounded-sm border border-border bg-background px-4 text-base text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary"
+              />
+            </label>
+
+            <label className="flex flex-col gap-2 text-sm text-foreground/70">
+              휴대폰 번호
+              <input
+                type="tel"
+                name="phone"
+                autoComplete="tel"
+                required
+                placeholder="010-0000-0000"
+                className="h-12 rounded-sm border border-border bg-background px-4 text-base text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary"
+              />
+            </label>
+
+            <label className="flex flex-col gap-2 text-sm text-foreground/70">
+              생년월일
+              <input
+                type="date"
+                name="birth"
+                autoComplete="bday"
+                className="h-12 rounded-sm border border-border bg-background px-4 text-base text-foreground outline-none transition-colors focus:border-primary"
+              />
+            </label>
+
+            <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-foreground/65">
+              <input
+                type="checkbox"
+                name="marketing_agree"
+                className="mt-1 h-4 w-4 accent-primary"
+              />
+              마케팅 정보 수신에 동의합니다. (선택)
+            </label>
+
             <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-foreground/65">
               <input
                 type="checkbox"
@@ -196,10 +282,13 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         <div className="mt-5 grid gap-3">
           <button
             type="button"
-            disabled
+            onClick={handleKakaoLogin}
+            disabled={!KAKAO_LOGIN_ENABLED || isKakaoLoading}
             className="h-12 rounded-full bg-[#FEE500] px-6 text-sm font-medium text-[#191919] opacity-60"
           >
-            카카오로 시작하기 · 준비 중
+            {isKakaoLoading
+              ? "카카오 로그인 연결 중..."
+              : "카카오로 시작하기 · 준비 중"}
           </button>
           <button
             type="button"

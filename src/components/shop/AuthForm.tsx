@@ -25,10 +25,16 @@ function getAuthErrorMessage(message: string): string {
   return "잠시 후 다시 시도해 주세요.";
 }
 
-export function AuthForm({ mode }: { mode: AuthMode }) {
+export function AuthForm({
+  mode,
+  initialError,
+}: {
+  mode: AuthMode;
+  initialError?: string;
+}) {
   const router = useRouter();
-  const [message, setMessage] = useState<string | null>(null);
-  const [isError, setIsError] = useState(false);
+  const [message, setMessage] = useState<string | null>(initialError ?? null);
+  const [isError, setIsError] = useState(Boolean(initialError));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isKakaoLoading, setIsKakaoLoading] = useState(false);
   const isLogin = mode === "login";

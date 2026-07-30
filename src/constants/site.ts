@@ -27,7 +27,7 @@ export const SITE_CONFIG = {
   contact: {
     address: "충남 천안시 천호지길 27",
     phone: "010-8822-9428",
-    email: "lghkfkdehl1@naver.com",
+    email: "picoffeeroasters@naver.com",
     instagramUrl:
       "https://www.instagram.com/picoffee.roasters?igsh=MW94Z3kzc3g2Z3R5bg==",
     naverMapUrl:

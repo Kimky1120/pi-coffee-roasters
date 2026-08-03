@@ -6,7 +6,8 @@ import { HeroContent } from "./HeroContent";
  * HERO_IMAGE_SRC 값만 바꾸면 된다.
  */
 const HERO_IMAGE_SRC = "/images/hero/roastery-placeholder.jpg";
-const HERO_IMAGE_ALT = "PI Coffee Roasters 로스팅룸에서 원두를 살피는 로스터의 모습";
+const HERO_IMAGE_ALT =
+  "천안 안서동 파이커피로스터스 로스팅룸에서 원두를 살피는 로스터의 모습";
 
 export function Hero() {
   return (

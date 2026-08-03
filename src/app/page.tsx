@@ -6,6 +6,7 @@ import { Wholesale } from "@/sections/wholesale/Wholesale";
 import { Gallery } from "@/sections/gallery/Gallery";
 import { Contact } from "@/sections/contact/Contact";
 import { AuthNotice } from "@/components/shop/AuthNotice";
+import { getWebSiteJsonLd } from "@/lib/seo/jsonld";
 
 const AUTH_MESSAGES: Record<string, string> = {
   "check-email":
@@ -32,6 +33,12 @@ export default async function Home({
       <Wholesale />
       <Gallery />
       <Contact />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(getWebSiteJsonLd()),
+        }}
+      />
     </main>
   );
 }

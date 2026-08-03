@@ -1,6 +1,16 @@
 "use client";
 
-import { AtSign, Mail, Map, MapPin, Phone, type LucideIcon } from "lucide-react";
+import {
+  ArrowUpRight,
+  AtSign,
+  Clock3,
+  Mail,
+  Map,
+  MapPin,
+  MessageCircle,
+  Phone,
+  type LucideIcon,
+} from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { SectionIntro } from "@/components/ui/SectionIntro";
 import { DURATION, EASE, OFFSET } from "@/lib/motion";
@@ -8,6 +18,7 @@ import type { ContactChannel, ContactChannelKey, ContactInfo } from "@/types/con
 
 const CHANNEL_ICONS: Record<ContactChannelKey, LucideIcon> = {
   address: MapPin,
+  hours: Clock3,
   phone: Phone,
   email: Mail,
   instagramUrl: AtSign,
@@ -17,12 +28,13 @@ const CHANNEL_ICONS: Record<ContactChannelKey, LucideIcon> = {
 
 function getChannelHref(key: ContactChannelKey, value: string): string | undefined {
   switch (key) {
+    case "hours":
+    case "address":
+      return undefined;
     case "phone":
       return `tel:${value}`;
     case "email":
       return `mailto:${value}`;
-    case "address":
-      return undefined;
     default:
       return value;
   }
@@ -41,9 +53,11 @@ function getChannelDisplayValue(
 export function ContactContent({
   channels,
   contact,
+  kakaoChatUrl,
 }: {
   channels: ContactChannel[];
   contact: ContactInfo;
+  kakaoChatUrl: string;
 }) {
   const shouldReduceMotion = useReducedMotion();
   const availableChannels = channels.filter((channel) => contact[channel.key]);
@@ -60,7 +74,7 @@ export function ContactContent({
       <SectionIntro
         eyebrow="07 — Contact"
         title="Contact"
-        description="PI Coffee Roasters와 함께할 새로운 공간을 기다립니다."
+        description="천안 안서동 파이커피로스터스와 함께할 새로운 공간을 기다립니다."
       />
 
       <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
@@ -134,6 +148,53 @@ export function ContactContent({
               </span>
             ))}
           </div>
+
+          {kakaoChatUrl && (
+            <a
+              href={kakaoChatUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative overflow-hidden rounded-sm border border-black/10 bg-[#FEE500] p-5 text-[#191919] transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-[#191919]/10 sm:p-6"
+            >
+              <span
+                aria-hidden
+                className="absolute -top-12 -right-10 h-36 w-36 rounded-full border border-[#191919]/10"
+              />
+              <span
+                aria-hidden
+                className="absolute -right-4 -bottom-16 h-32 w-32 rounded-full bg-white/20"
+              />
+
+              <span className="relative flex flex-col gap-5">
+                <span className="flex min-w-0 flex-1 items-start gap-4">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#191919] text-[#FEE500] shadow-sm">
+                    <MessageCircle
+                      aria-hidden
+                      className="h-6 w-6"
+                      strokeWidth={1.8}
+                    />
+                  </span>
+                  <span className="flex min-w-0 flex-col gap-1.5">
+                    <span className="font-sans text-[11px] font-semibold tracking-[0.14em] text-[#191919]/55">
+                      KAKAO 1:1 CHAT
+                    </span>
+                    <strong className="font-display text-xl font-semibold tracking-tight sm:text-2xl">
+                      원두와 납품, 톡으로 편하게 물어보세요
+                    </strong>
+                    <span className="font-sans text-sm leading-relaxed text-[#191919]/65">
+                      매장에 맞는 원두 선택부터 샘플·납품 상담까지 편하게
+                      남겨주세요.
+                    </span>
+                  </span>
+                </span>
+
+                <span className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#191919] px-5 font-sans text-sm font-medium text-white transition-transform duration-300 group-hover:translate-x-1">
+                  카카오톡으로 상담하기
+                  <ArrowUpRight aria-hidden className="h-4 w-4" />
+                </span>
+              </span>
+            </a>
+          )}
         </motion.div>
       </div>
     </div>

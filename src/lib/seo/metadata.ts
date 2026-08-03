@@ -7,7 +7,7 @@ export const defaultMetadata: Metadata = {
     canonical: SITE_CONFIG.url,
   },
   title: {
-    default: `${SITE_CONFIG.name} | ${SITE_CONFIG.slogan}`,
+    default: SITE_CONFIG.homeTitle,
     template: `%s | ${SITE_CONFIG.name}`,
   },
   description: SITE_CONFIG.description,
@@ -17,7 +17,7 @@ export const defaultMetadata: Metadata = {
     locale: SITE_CONFIG.locale,
     url: SITE_CONFIG.url,
     siteName: SITE_CONFIG.name,
-    title: `${SITE_CONFIG.name} | ${SITE_CONFIG.slogan}`,
+    title: SITE_CONFIG.homeTitle,
     description: SITE_CONFIG.description,
     images: [
       {
@@ -30,7 +30,7 @@ export const defaultMetadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE_CONFIG.name} | ${SITE_CONFIG.slogan}`,
+    title: SITE_CONFIG.homeTitle,
     description: SITE_CONFIG.description,
     images: ["/og-image.jpg"],
   },

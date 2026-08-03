@@ -5,22 +5,40 @@ import { SITE_CONFIG } from "@/constants/site";
  * address/telephone/sameAs 필드가 자동으로 채워진다.
  */
 export function getLocalBusinessJsonLd() {
-  const { contact } = SITE_CONFIG;
+  const { businessAddress, contact, openingHours } = SITE_CONFIG;
 
   return {
     "@context": "https://schema.org",
     "@type": "CafeOrCoffeeShop",
     name: SITE_CONFIG.name,
+    alternateName: SITE_CONFIG.alternateName,
     description: SITE_CONFIG.description,
     url: SITE_CONFIG.url,
+    image: `${SITE_CONFIG.url}/og-image.jpg`,
     ...(contact.address && {
       address: {
         "@type": "PostalAddress",
-        streetAddress: contact.address,
-        addressCountry: "KR",
+        ...businessAddress,
       },
     }),
+    openingHoursSpecification: {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: openingHours.days,
+      opens: openingHours.opens,
+      closes: openingHours.closes,
+    },
     ...(contact.phone && { telephone: contact.phone }),
-    ...(contact.instagramUrl && { sameAs: [contact.instagramUrl] }),
+    ...(contact.naverMapUrl && { hasMap: contact.naverMapUrl }),
+    sameAs: [contact.instagramUrl, contact.naverMapUrl].filter(Boolean),
+  };
+}
+
+export function getWebSiteJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_CONFIG.name,
+    alternateName: SITE_CONFIG.alternateName,
+    url: SITE_CONFIG.url,
   };
 }

@@ -1,5 +1,6 @@
 export type ContactChannelKey =
   | "address"
+  | "hours"
   | "phone"
   | "email"
   | "instagramUrl"

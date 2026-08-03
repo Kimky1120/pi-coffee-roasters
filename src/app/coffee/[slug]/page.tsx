@@ -27,8 +27,8 @@ export async function generateMetadata({
   if (!bean) return {};
 
   return {
-    title: `${bean.name} | PI Coffee Roasters`,
-    description: `${bean.name} 원두와 파이커피 로스터스의 커피 이야기를 소개합니다.`,
+    title: `${bean.name} 원두`,
+    description: `${bean.name} 원두와 파이커피로스터스의 커피 이야기를 소개합니다.`,
     alternates: {
       canonical: `${SITE_CONFIG.url}/coffee/${bean.slug}`,
     },
@@ -37,8 +37,8 @@ export async function generateMetadata({
       locale: SITE_CONFIG.locale,
       url: `${SITE_CONFIG.url}/coffee/${bean.slug}`,
       siteName: SITE_CONFIG.name,
-      title: `${bean.name} | PI Coffee Roasters`,
-      description: `${bean.name} 원두와 파이커피 로스터스의 커피 이야기를 소개합니다.`,
+      title: `${bean.name} 원두 | ${SITE_CONFIG.name}`,
+      description: `${bean.name} 원두와 파이커피로스터스의 커피 이야기를 소개합니다.`,
     },
   };
 }
@@ -78,8 +78,8 @@ export default async function CoffeeDetailPage({
             src={src}
             alt={
               index === 0
-                ? "PI Coffee Roasters 상세페이지"
-                : `PI Coffee Roasters 상세 이미지 ${index + 1}`
+                ? "파이커피로스터스 원두 상세페이지"
+                : `파이커피로스터스 원두 상세 이미지 ${index + 1}`
             }
             width={1720}
             height={5160}

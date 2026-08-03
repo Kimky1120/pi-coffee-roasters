@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -17,17 +17,24 @@ const STATUS_LABEL: Record<CoffeeBean["status"], string> = {
 export function CoffeeCard({ bean }: { bean: CoffeeBean }) {
   const cardRef = useRef<HTMLAnchorElement>(null);
   const isInView = useInView(cardRef, { amount: 0.35 });
+  const [isPointerActive, setIsPointerActive] = useState(false);
 
   return (
     <Link
       ref={cardRef}
       href={`/coffee/${bean.slug}`}
       aria-label={`${bean.name} 상세페이지 보기`}
+      onPointerEnter={() => setIsPointerActive(true)}
+      onPointerLeave={() => setIsPointerActive(false)}
+      onFocus={() => setIsPointerActive(true)}
+      onBlur={() => setIsPointerActive(false)}
       className={cn(
         "group relative flex h-full min-h-[660px] overflow-hidden rounded-sm border border-border bg-background",
         "transition-[transform,box-shadow,border-color] duration-300 ease-out",
         "hover:-translate-y-2 hover:border-transparent hover:shadow-xl hover:shadow-primary/15",
         "focus-visible:-translate-y-2 focus-visible:border-transparent focus-visible:shadow-xl focus-visible:shadow-primary/15",
+        isPointerActive &&
+          "-translate-y-2 border-transparent shadow-xl shadow-primary/15",
         isInView &&
           "max-md:-translate-y-2 max-md:border-transparent max-md:shadow-xl max-md:shadow-primary/15",
       )}
@@ -40,6 +47,7 @@ export function CoffeeCard({ bean }: { bean: CoffeeBean }) {
         className={cn(
           "object-cover scale-100 opacity-0 transition-[opacity,transform] duration-700 ease-out",
           "group-hover:scale-[1.06] group-hover:opacity-100 group-focus-visible:scale-[1.06] group-focus-visible:opacity-100",
+          isPointerActive && "scale-[1.06] opacity-100",
           isInView && "max-md:scale-[1.06] max-md:opacity-100",
         )}
       />
@@ -47,6 +55,7 @@ export function CoffeeCard({ bean }: { bean: CoffeeBean }) {
         className={cn(
           "absolute inset-0 bg-gradient-to-b from-black/40 via-black/35 to-black/75 opacity-0 transition-opacity duration-500",
           "group-hover:opacity-100 group-focus-visible:opacity-100",
+          isPointerActive && "opacity-100",
           isInView && "max-md:opacity-100",
         )}
       />
@@ -55,6 +64,7 @@ export function CoffeeCard({ bean }: { bean: CoffeeBean }) {
         className={cn(
           "relative z-10 flex w-full flex-col gap-5 p-8 transition-opacity duration-300 sm:p-10",
           "group-hover:opacity-0 group-focus-visible:opacity-0",
+          isPointerActive && "opacity-0",
           isInView && "max-md:opacity-0",
         )}
       >
@@ -132,6 +142,7 @@ export function CoffeeCard({ bean }: { bean: CoffeeBean }) {
         className={cn(
           "pointer-events-none absolute inset-0 z-20 flex translate-y-3 flex-col p-8 text-white opacity-0 transition-[opacity,transform] delay-75 duration-500 sm:p-10",
           "group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100",
+          isPointerActive && "translate-y-0 opacity-100",
           isInView && "max-md:translate-y-0 max-md:opacity-100",
         )}
       >

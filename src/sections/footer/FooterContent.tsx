@@ -9,12 +9,13 @@ import { DURATION, EASE, OFFSET } from "@/lib/motion";
 
 function getChannelHref(key: ContactChannelKey, value: string): string | undefined {
   switch (key) {
+    case "hours":
+    case "address":
+      return undefined;
     case "phone":
       return `tel:${value}`;
     case "email":
       return `mailto:${value}`;
-    case "address":
-      return undefined;
     default:
       return value;
   }

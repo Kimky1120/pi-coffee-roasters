@@ -3,6 +3,9 @@ import { SITE_CONFIG } from "@/constants/site";
 
 export const defaultMetadata: Metadata = {
   metadataBase: new URL(SITE_CONFIG.url),
+  alternates: {
+    canonical: SITE_CONFIG.url,
+  },
   title: {
     default: `${SITE_CONFIG.name} | ${SITE_CONFIG.slogan}`,
     template: `%s | ${SITE_CONFIG.name}`,

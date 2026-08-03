@@ -1,8 +1,26 @@
 /**
  * 실제 도메인이 확정되면 NEXT_PUBLIC_SITE_URL 환경변수로 덮어쓴다.
  */
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://pi-coffeeroasters.com";
+const DEFAULT_SITE_URL = "https://www.pi-coffeeroasters.com";
+const configuredSiteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_SITE_URL;
+
+const SITE_URL = (() => {
+  const url = new URL(configuredSiteUrl);
+
+  if (
+    url.hostname === "pi-coffeeroasters.com" ||
+    url.hostname === "www.pi-coffeeroasters.com"
+  ) {
+    url.protocol = "https:";
+    url.hostname = "www.pi-coffeeroasters.com";
+    url.pathname = url.pathname.replace(/\/+$/, "");
+    url.search = "";
+    url.hash = "";
+  }
+
+  return url.toString().replace(/\/$/, "");
+})();
 
 export const SITE_CONFIG = {
   name: "PI Coffee Roasters",

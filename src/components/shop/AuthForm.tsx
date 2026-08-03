@@ -286,7 +286,7 @@ export function AuthForm({
             type="button"
             onClick={handleKakaoLogin}
             disabled={isKakaoLoading}
-            className="h-12 rounded-full bg-[#FEE500] px-6 text-sm font-medium text-[#191919] opacity-60"
+            className="h-12 rounded-full bg-[#FEE500] px-6 text-sm font-medium text-[#191919] disabled:opacity-60"
           >
             {isKakaoLoading ? "카카오 로그인 연결 중..." : "카카오로 시작하기"}
           </button>

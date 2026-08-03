@@ -7,8 +7,6 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type AuthMode = "login" | "signup";
 
-const KAKAO_LOGIN_ENABLED = false;
-
 function getAuthErrorMessage(message: string): string {
   if (message.includes("Invalid login credentials")) {
     return "이메일 또는 비밀번호를 다시 확인해 주세요.";
@@ -116,8 +114,6 @@ export function AuthForm({
   }
 
   async function handleKakaoLogin() {
-    if (!KAKAO_LOGIN_ENABLED) return;
-
     const supabase = getSupabaseBrowserClient();
     if (!supabase) {
       setIsError(true);
@@ -289,12 +285,10 @@ export function AuthForm({
           <button
             type="button"
             onClick={handleKakaoLogin}
-            disabled={!KAKAO_LOGIN_ENABLED || isKakaoLoading}
+            disabled={isKakaoLoading}
             className="h-12 rounded-full bg-[#FEE500] px-6 text-sm font-medium text-[#191919] opacity-60"
           >
-            {isKakaoLoading
-              ? "카카오 로그인 연결 중..."
-              : "카카오로 시작하기 · 준비 중"}
+            {isKakaoLoading ? "카카오 로그인 연결 중..." : "카카오로 시작하기"}
           </button>
           <button
             type="button"

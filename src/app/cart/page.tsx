@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CartContent } from "@/components/shop/CartContent";
+import { getCheckoutReadiness } from "@/lib/checkout/config";
 
 export const metadata: Metadata = {
   title: "장바구니",
@@ -7,5 +8,6 @@ export const metadata: Metadata = {
 };
 
 export default function CartPage() {
-  return <CartContent />;
+  const { ready } = getCheckoutReadiness();
+  return <CartContent checkoutAvailable={ready} />;
 }

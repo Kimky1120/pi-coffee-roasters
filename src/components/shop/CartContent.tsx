@@ -18,7 +18,11 @@ import {
 } from "@/lib/cart";
 import { PreparationNotice } from "./PreparationNotice";
 
-export function CartContent() {
+export function CartContent({
+  checkoutAvailable,
+}: {
+  checkoutAvailable: boolean;
+}) {
   const items = useSyncExternalStore(
     subscribeCart,
     getCartSnapshot,
@@ -199,17 +203,27 @@ export function CartContent() {
               </strong>
             </div>
 
-            <button
-              type="button"
-              disabled
-              className="mt-7 h-12 w-full rounded-full bg-primary px-6 text-sm tracking-wide text-background opacity-45"
-            >
-              주문하기 · 준비 중
-            </button>
+            {checkoutAvailable ? (
+              <Link
+                href="/checkout"
+                className="mt-7 inline-flex h-12 w-full items-center justify-center rounded-full bg-primary px-6 text-sm tracking-wide text-background transition-colors hover:bg-primary/90"
+              >
+                주문하기
+              </Link>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="mt-7 h-12 w-full rounded-full bg-primary px-6 text-sm tracking-wide text-background opacity-45"
+              >
+                주문하기 · 준비 중
+              </button>
+            )}
 
             <PreparationNotice className="mt-5">
-              온라인 결제는 준비 중입니다. 장바구니 상품은 현재 사용 중인
-              브라우저에만 저장됩니다.
+              {checkoutAvailable
+                ? "결제 전 서버에서 상품 옵션과 현재 가격을 다시 확인합니다."
+                : "온라인 결제는 준비 중입니다. 장바구니 상품은 현재 사용 중인 브라우저에만 저장됩니다."}
             </PreparationNotice>
           </aside>
         </div>

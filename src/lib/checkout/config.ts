@@ -36,6 +36,7 @@ function parseNonNegativeInteger(name: string, defaultValue?: number) {
 
 function parseFreeShippingThreshold() {
   const value = process.env.FREE_SHIPPING_THRESHOLD_KRW;
+  if (value === undefined) return 50000;
   if (value === "NONE") return null;
   return parseNonNegativeInteger("FREE_SHIPPING_THRESHOLD_KRW");
 }

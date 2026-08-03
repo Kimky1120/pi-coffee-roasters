@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { COFFEE_BEANS } from "@/data/coffee";
 import { PurchaseOptions } from "@/components/shop/PurchaseOptions";
+import { SITE_CONFIG } from "@/constants/site";
 
 const DETAIL_IMAGES = Array.from(
   { length: 11 },
@@ -28,6 +29,17 @@ export async function generateMetadata({
   return {
     title: `${bean.name} | PI Coffee Roasters`,
     description: `${bean.name} 원두와 파이커피 로스터스의 커피 이야기를 소개합니다.`,
+    alternates: {
+      canonical: `${SITE_CONFIG.url}/coffee/${bean.slug}`,
+    },
+    openGraph: {
+      type: "website",
+      locale: SITE_CONFIG.locale,
+      url: `${SITE_CONFIG.url}/coffee/${bean.slug}`,
+      siteName: SITE_CONFIG.name,
+      title: `${bean.name} | PI Coffee Roasters`,
+      description: `${bean.name} 원두와 파이커피 로스터스의 커피 이야기를 소개합니다.`,
+    },
   };
 }
 

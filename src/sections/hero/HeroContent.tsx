@@ -25,12 +25,18 @@ export function HeroContent() {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-4">
-        <Button href="#about" variant="solid">
-          About
-        </Button>
-        <Button href="#our-coffee" variant="outline">
-          Coffee
+      <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          <Button href="#about" variant="solid">
+            About
+          </Button>
+          <Button href="#our-coffee" variant="outline">
+            Coffee
+          </Button>
+        </div>
+
+        <Button href="/coffee/pi-ting" variant="primary">
+          구매하기
         </Button>
       </div>
     </motion.div>

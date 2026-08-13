@@ -179,17 +179,17 @@ export function ContactContent({
                       KAKAO 1:1 CHAT
                     </span>
                     <strong className="font-display text-xl font-semibold tracking-tight sm:text-2xl">
-                      원두와 납품, 톡으로 편하게 물어보세요
+                      원두 납품과 주문, 톡으로 편하게 문의하세요
                     </strong>
                     <span className="font-sans text-sm leading-relaxed text-[#191919]/65">
-                      매장에 맞는 원두 선택부터 샘플·납품 상담까지 편하게
+                      채널을 추가하고 원두 선택부터 납품·주문 상담까지 편하게
                       남겨주세요.
                     </span>
                   </span>
                 </span>
 
                 <span className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#191919] px-5 font-sans text-sm font-medium text-white transition-transform duration-300 group-hover:translate-x-1">
-                  카카오톡으로 상담하기
+                  카카오톡 채널 바로가기
                   <ArrowUpRight aria-hidden className="h-4 w-4" />
                 </span>
               </span>

@@ -4,7 +4,9 @@
 const DEFAULT_SITE_URL = "https://www.pi-coffeeroasters.com";
 const configuredSiteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_SITE_URL;
-const kakaoChatUrl = process.env.NEXT_PUBLIC_KAKAO_CHAT_URL?.trim() ?? "";
+const DEFAULT_KAKAO_CHANNEL_URL = "https://pf.kakao.com/_uEIiX";
+const kakaoChatUrl =
+  process.env.NEXT_PUBLIC_KAKAO_CHAT_URL?.trim() || DEFAULT_KAKAO_CHANNEL_URL;
 
 const SITE_URL = (() => {
   const url = new URL(configuredSiteUrl);

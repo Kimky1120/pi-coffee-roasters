@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { COFFEE_BEANS } from "@/data/coffee";
 import { PurchaseOptions } from "@/components/shop/PurchaseOptions";
+import { KakaoChannelFloat } from "@/components/shop/KakaoChannelFloat";
 import { SITE_CONFIG } from "@/constants/site";
 
 const DETAIL_IMAGES = Array.from(
@@ -89,6 +90,7 @@ export default async function CoffeeDetailPage({
           />
         ))}
       </article>
+      <KakaoChannelFloat href={SITE_CONFIG.kakaoChatUrl} />
     </main>
   );
 }

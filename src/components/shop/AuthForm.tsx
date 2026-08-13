@@ -46,6 +46,7 @@ export function AuthForm({
     const email = String(formData.get("email") ?? "").trim();
     const password = String(formData.get("password") ?? "");
     const passwordConfirm = String(formData.get("password-confirm") ?? "");
+    const name = String(formData.get("name") ?? "").trim();
     const nickname = String(formData.get("nickname") ?? "").trim();
     const phone = String(formData.get("phone") ?? "").trim();
     const birth = String(formData.get("birth") ?? "");
@@ -90,6 +91,7 @@ export function AuthForm({
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback?next=/`,
           data: {
+            name,
             phone,
             nickname,
             birth: birth || null,
@@ -198,6 +200,20 @@ export function AuthForm({
             </label>
 
             <label className="flex flex-col gap-2 text-sm text-foreground/70">
+              성명
+              <input
+                type="text"
+                name="name"
+                autoComplete="name"
+                minLength={2}
+                maxLength={30}
+                required
+                placeholder="주문자 실명을 입력해 주세요"
+                className="h-12 rounded-sm border border-border bg-background px-4 text-base text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary"
+              />
+            </label>
+
+            <label className="flex flex-col gap-2 text-sm text-foreground/70">
               닉네임
               <input
                 type="text"
@@ -215,20 +231,29 @@ export function AuthForm({
                 type="tel"
                 name="phone"
                 autoComplete="tel"
+                inputMode="tel"
+                pattern="010-[0-9]{4}-[0-9]{4}"
                 required
                 placeholder="010-0000-0000"
                 className="h-12 rounded-sm border border-border bg-background px-4 text-base text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary"
               />
+              <span className="text-xs leading-relaxed text-foreground/40">
+                성명과 휴대폰 번호는 주문·배송 확인에 사용됩니다. 가입 후에는
+                마이페이지에서 본인확인을 거쳐 변경할 수 있습니다.
+              </span>
             </label>
 
             <label className="flex flex-col gap-2 text-sm text-foreground/70">
-              생년월일
+              생년월일 <span className="text-xs text-foreground/40">(선택)</span>
               <input
                 type="date"
                 name="birth"
                 autoComplete="bday"
                 className="h-12 rounded-sm border border-border bg-background px-4 text-base text-foreground outline-none transition-colors focus:border-primary"
               />
+              <span className="text-xs leading-relaxed text-foreground/40">
+                가입 후에는 마이페이지에서 본인확인을 거쳐 변경할 수 있습니다.
+              </span>
             </label>
 
             <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-foreground/65">
@@ -237,7 +262,8 @@ export function AuthForm({
                 name="marketing_agree"
                 className="mt-1 h-4 w-4 accent-primary"
               />
-              마케팅 정보 수신에 동의합니다. (선택)
+              이메일·문자로 할인, 신상품 등 마케팅 정보를 받는 데 동의합니다.
+              (선택)
             </label>
 
             <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-foreground/65">

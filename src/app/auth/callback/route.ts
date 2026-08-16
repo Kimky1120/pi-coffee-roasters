@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { syncSocialProfile } from "@/lib/auth/social-profile";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -9,10 +10,27 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      const response = NextResponse.redirect(`${origin}${next}`);
+      let destination = next;
+
+      if (data.user) {
+        try {
+          const socialProfile = await syncSocialProfile({
+            user: data.user,
+            providerToken: data.session?.provider_token,
+          });
+
+          if (next === "/" && socialProfile.needsOnboarding) {
+            destination = "/account/onboarding";
+          }
+        } catch {
+          // 프로필 자동 입력이 실패해도 로그인은 정상 완료한다.
+        }
+      }
+
+      const response = NextResponse.redirect(`${origin}${destination}`);
 
       if (
         next === "/account?verified=kakao" ||

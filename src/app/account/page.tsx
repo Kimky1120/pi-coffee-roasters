@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/account/ProfileForm";
 
@@ -26,6 +27,24 @@ export default async function AccountPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const socialProvider = user?.identities?.some(
+    (identity) => identity.provider === "kakao",
+  )
+    ? "kakao"
+    : user?.identities?.some(
+          (identity) => identity.provider === "custom:naver",
+        )
+      ? "naver"
+      : null;
+
+  if (
+    user &&
+    socialProvider &&
+    user.app_metadata?.social_onboarding_completed !== true
+  ) {
+    redirect("/account/onboarding");
+  }
+
   const profile = user
     ? (
         await supabase
@@ -41,15 +60,6 @@ export default async function AccountPage() {
   const hasEmailPassword =
     user?.identities?.some((identity) => identity.provider === "email") ??
     user?.app_metadata.provider === "email";
-  const socialProvider = user?.identities?.some(
-    (identity) => identity.provider === "kakao",
-  )
-    ? "kakao"
-    : user?.identities?.some(
-          (identity) => identity.provider === "custom:naver",
-        )
-      ? "naver"
-      : null;
   const recentReauthentication = cookieStore.get("pi_account_reauth")?.value;
 
   return (
@@ -79,7 +89,12 @@ export default async function AccountPage() {
 
         {user ? (
           <ProfileForm
-            email={user.email ?? ""}
+            email={String(
+              user.email ??
+                user.app_metadata?.social_email ??
+                user.user_metadata?.email ??
+                "",
+            )}
             name={profile?.name ?? ""}
             nickname={profile?.nickname ?? ""}
             phone={profile?.phone ?? ""}

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { UserRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/account/ProfileForm";
 
@@ -39,11 +38,19 @@ export default async function AccountPage() {
       ).data
     : null;
 
-  const displayName =
-    profile?.nickname || profile?.name || user?.email?.split("@")[0] || "회원";
   const hasEmailPassword =
     user?.identities?.some((identity) => identity.provider === "email") ??
     user?.app_metadata.provider === "email";
+  const socialProvider = user?.identities?.some(
+    (identity) => identity.provider === "kakao",
+  )
+    ? "kakao"
+    : user?.identities?.some(
+          (identity) => identity.provider === "custom:naver",
+        )
+      ? "naver"
+      : null;
+  const recentReauthentication = cookieStore.get("pi_account_reauth")?.value;
 
   return (
     <main className="min-h-screen flex-1 bg-background px-5 pb-24 pt-28 sm:px-8 sm:pb-32 sm:pt-36">
@@ -71,44 +78,21 @@ export default async function AccountPage() {
         </header>
 
         {user ? (
-          <div className="grid gap-7 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
-            <aside className="rounded-sm border border-border bg-surface p-6 lg:sticky lg:top-24">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-background">
-                <UserRound className="h-6 w-6" aria-hidden />
-              </div>
-              <p className="mt-6 font-display text-2xl font-medium text-primary">
-                {displayName}님
-              </p>
-              <p className="mt-1 break-all text-sm text-foreground/50">
-                {user.email}
-              </p>
-              <div className="mt-7 border-t border-border pt-5">
-                <p className="text-xs leading-6 text-foreground/50">
-                  주문과 배송에 사용할 본인정보는 현재 비밀번호 또는 등록 이메일
-                  인증 후 변경할 수 있습니다.
-                </p>
-              </div>
-            </aside>
-
-            <ProfileForm
-              email={user.email ?? ""}
-              name={profile?.name ?? ""}
-              nickname={profile?.nickname ?? ""}
-              phone={profile?.phone ?? ""}
-              birth={profile?.birth ?? ""}
-              hasEmailPassword={hasEmailPassword}
-              marketingAgree={profile?.marketing_agree ?? false}
-              marketingAgreeUpdatedAt={
-                profile?.marketing_agree_updated_at ?? ""
-              }
-              hasRecentKakaoAuth={
-                cookieStore.get("pi_account_reauth")?.value === "kakao"
-              }
-              hasRecentEmailAuth={
-                cookieStore.get("pi_account_reauth")?.value === "email"
-              }
-            />
-          </div>
+          <ProfileForm
+            email={user.email ?? ""}
+            name={profile?.name ?? ""}
+            nickname={profile?.nickname ?? ""}
+            phone={profile?.phone ?? ""}
+            birth={profile?.birth ?? ""}
+            hasEmailPassword={hasEmailPassword}
+            socialProvider={socialProvider}
+            marketingAgree={profile?.marketing_agree ?? false}
+            marketingAgreeUpdatedAt={
+              profile?.marketing_agree_updated_at ?? ""
+            }
+            hasRecentSocialAuth={recentReauthentication === socialProvider}
+            hasRecentEmailAuth={recentReauthentication === "email"}
+          />
         ) : (
           <div className="rounded-sm border border-border bg-surface px-6 py-10 text-center text-sm text-foreground/60">
             로그인된 계정이 없습니다.

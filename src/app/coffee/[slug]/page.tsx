@@ -7,6 +7,7 @@ import { COFFEE_BEANS } from "@/data/coffee";
 import { PurchaseOptions } from "@/components/shop/PurchaseOptions";
 import { KakaoChannelFloat } from "@/components/shop/KakaoChannelFloat";
 import { SITE_CONFIG } from "@/constants/site";
+import { getCheckoutReadiness } from "@/lib/checkout/config";
 
 const DETAIL_IMAGES = Array.from(
   { length: 11 },
@@ -54,6 +55,12 @@ export default async function CoffeeDetailPage({
 
   if (!bean) notFound();
 
+  const { config } = getCheckoutReadiness();
+  const shippingRules = config?.shippingRules ?? {
+    shippingFee: 3_000,
+    freeShippingThreshold: 50_000,
+  };
+
   return (
     <main className="min-h-screen bg-[#f4f4f4] pt-14 sm:pt-16">
       <div className="sticky top-14 z-20 border-b border-black/10 bg-[#f4f4f4]/90 backdrop-blur-md sm:top-16">
@@ -72,7 +79,13 @@ export default async function CoffeeDetailPage({
       </div>
 
       <article className="mx-auto w-full max-w-[860px] bg-[#f4f4f4]">
-        <PurchaseOptions productName={bean.name} productSlug={bean.slug} />
+        <PurchaseOptions
+          productName={bean.name}
+          productSlug={bean.slug}
+          productImage={bean.image}
+          shippingFee={shippingRules.shippingFee}
+          freeShippingThreshold={shippingRules.freeShippingThreshold}
+        />
         {DETAIL_IMAGES.map((src, index) => (
           <Image
             key={src}

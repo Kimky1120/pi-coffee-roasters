@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, ShoppingBag } from "lucide-react";
+import { Minus, Plus, ShoppingBag, Truck } from "lucide-react";
 import {
   formatPrice,
   GRIND_OPTIONS,
@@ -16,9 +17,15 @@ import { PreparationNotice } from "./PreparationNotice";
 export function PurchaseOptions({
   productName,
   productSlug,
+  productImage,
+  shippingFee,
+  freeShippingThreshold,
 }: {
   productName: string;
   productSlug: string;
+  productImage: string;
+  shippingFee: number;
+  freeShippingThreshold: number | null;
 }) {
   const prices = PRODUCT_PRICES[productSlug];
   const weightOptions = Object.keys(prices) as ProductWeight[];
@@ -36,7 +43,7 @@ export function PurchaseOptions({
       aria-labelledby="purchase-options-title"
       className="border-b border-black/10 bg-background px-5 py-10 sm:px-8 sm:py-14"
     >
-      <div className="grid gap-10 md:grid-cols-[0.8fr_1.2fr] md:gap-14">
+      <div className="grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:gap-14">
         <div>
           <span className="font-sans text-xs tracking-[0.2em] text-primary/50">
             COFFEE BEANS
@@ -50,6 +57,16 @@ export function PurchaseOptions({
           <p className="mt-5 text-sm leading-7 text-foreground/65">
             원하시는 용량과 분쇄도를 선택해 주세요.
           </p>
+          <div className="relative mt-7 aspect-[4/3] overflow-hidden rounded-sm border border-border bg-surface md:aspect-[4/5]">
+            <Image
+              src={productImage}
+              alt={`${productName} 원두의 대표 컵노트 이미지`}
+              fill
+              priority
+              sizes="(min-width: 768px) 340px, calc(100vw - 40px)"
+              className="object-cover object-center"
+            />
+          </div>
         </div>
 
         <div className="flex flex-col gap-7">
@@ -138,6 +155,23 @@ export function PurchaseOptions({
                 </span>
               </div>
             )}
+          </div>
+
+          <div className="flex items-start gap-3 border-y border-border py-4 text-sm">
+            <Truck
+              className="mt-0.5 h-4 w-4 shrink-0 text-primary/60"
+              aria-hidden
+            />
+            <div className="flex flex-col gap-1">
+              <span className="font-medium text-primary">
+                배송비 {formatPrice(shippingFee)}원
+              </span>
+              {freeShippingThreshold !== null && (
+                <span className="text-xs text-foreground/55">
+                  {formatPrice(freeShippingThreshold)}원 이상 구매 시 무료배송
+                </span>
+              )}
+            </div>
           </div>
 
           <button

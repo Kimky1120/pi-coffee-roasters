@@ -8,6 +8,17 @@ export const metadata: Metadata = {
 };
 
 export default function CartPage() {
-  const { ready } = getCheckoutReadiness();
-  return <CartContent checkoutAvailable={ready} />;
+  const { ready, config } = getCheckoutReadiness();
+  const shippingRules = config?.shippingRules ?? {
+    shippingFee: 3_000,
+    freeShippingThreshold: 50_000,
+  };
+
+  return (
+    <CartContent
+      checkoutAvailable={ready}
+      shippingFee={shippingRules.shippingFee}
+      freeShippingThreshold={shippingRules.freeShippingThreshold}
+    />
+  );
 }

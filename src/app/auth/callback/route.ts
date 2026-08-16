@@ -14,16 +14,22 @@ export async function GET(request: Request) {
     if (!error) {
       const response = NextResponse.redirect(`${origin}${next}`);
 
-      if (next === "/account?verified=kakao") {
+      if (
+        next === "/account?verified=kakao" ||
+        next === "/account?verified=naver"
+      ) {
+        const socialProvider = next.endsWith("naver") ? "naver" : "kakao";
+        const identityProvider =
+          socialProvider === "naver" ? "custom:naver" : "kakao";
         const {
           data: { user },
         } = await supabase.auth.getUser();
-        const hasKakaoIdentity = user?.identities?.some(
-          (identity) => identity.provider === "kakao",
+        const hasSocialIdentity = user?.identities?.some(
+          (identity) => identity.provider === identityProvider,
         );
 
-        if (hasKakaoIdentity) {
-          response.cookies.set("pi_account_reauth", "kakao", {
+        if (hasSocialIdentity) {
+          response.cookies.set("pi_account_reauth", socialProvider, {
             httpOnly: true,
             sameSite: "lax",
             secure: process.env.NODE_ENV === "production",

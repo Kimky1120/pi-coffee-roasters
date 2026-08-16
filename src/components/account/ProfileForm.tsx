@@ -8,6 +8,7 @@ import {
   LockKeyhole,
   Pencil,
   ShieldCheck,
+  UserRound,
   X,
 } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -84,7 +85,8 @@ export function ProfileForm({
   phone: initialPhone,
   birth: initialBirth,
   hasEmailPassword,
-  hasRecentKakaoAuth,
+  socialProvider,
+  hasRecentSocialAuth,
   hasRecentEmailAuth,
   marketingAgree: initialMarketingAgree,
   marketingAgreeUpdatedAt: initialMarketingAgreeUpdatedAt,
@@ -95,7 +97,8 @@ export function ProfileForm({
   phone: string;
   birth: string;
   hasEmailPassword: boolean;
-  hasRecentKakaoAuth: boolean;
+  socialProvider: "kakao" | "naver" | null;
+  hasRecentSocialAuth: boolean;
   hasRecentEmailAuth: boolean;
   marketingAgree: boolean;
   marketingAgreeUpdatedAt: string;
@@ -103,7 +106,7 @@ export function ProfileForm({
   const [name, setName] = useState(initialName);
   const [nickname, setNickname] = useState(initialNickname);
   const [phone, setPhone] = useState(initialPhone);
-  const [birth, setBirth] = useState(initialBirth);
+  const birth = initialBirth;
   const [draftNickname, setDraftNickname] = useState(initialNickname);
   const [isEditing, setIsEditing] = useState(false);
   const [isIdentityOpen, setIsIdentityOpen] = useState(false);
@@ -139,9 +142,7 @@ export function ProfileForm({
 
   async function handleProfileSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
     const nextNickname = draftNickname.trim();
-    const currentPassword = String(formData.get("current-password") ?? "");
 
     if (nextNickname.length < 2 || nextNickname.length > 20) {
       setProfileFeedback({
@@ -159,7 +160,6 @@ export function ProfileForm({
       body: JSON.stringify({
         action: "nickname",
         nickname: nextNickname,
-        currentPassword,
       }),
     });
     const result = (await response.json()) as { message?: string };
@@ -186,7 +186,6 @@ export function ProfileForm({
     const formData = new FormData(event.currentTarget);
     const nextName = String(formData.get("name") ?? name).trim();
     const nextPhone = String(formData.get("phone") ?? phone).trim();
-    const nextBirth = String(formData.get("birth") ?? birth);
     const currentPassword = String(formData.get("current-password") ?? "");
 
     if (nextName.length < 2 || nextName.length > 30) {
@@ -213,7 +212,6 @@ export function ProfileForm({
         action: "identity",
         name: nextName,
         phone: nextPhone,
-        birth: nextBirth,
         currentPassword,
       }),
     });
@@ -232,7 +230,6 @@ export function ProfileForm({
 
     setName(nextName);
     setPhone(nextPhone);
-    setBirth(nextBirth);
     setIsIdentityOpen(false);
     setIdentityFeedback({
       type: "success",
@@ -272,14 +269,12 @@ export function ProfileForm({
     });
   }
 
-  async function handleKakaoReauthentication(
-    target: "profile" | "identity",
-  ) {
-    const setFeedback =
-      target === "profile" ? setProfileFeedback : setIdentityFeedback;
+  async function handleSocialReauthentication() {
+    const provider = socialProvider ?? "kakao";
+    const providerLabel = provider === "naver" ? "네이버" : "카카오";
     const supabase = getSupabaseBrowserClient();
     if (!supabase) {
-      setFeedback({
+      setIdentityFeedback({
         type: "error",
         message: "회원 서비스를 연결하는 중입니다. 잠시 후 다시 시도해 주세요.",
       });
@@ -288,39 +283,37 @@ export function ProfileForm({
 
     setSaving(true);
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: "kakao",
+      provider: provider === "naver" ? "custom:naver" : "kakao",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/account?verified=kakao`,
-        queryParams: { prompt: "login" },
+        redirectTo: `${window.location.origin}/auth/callback?next=/account?verified=${provider}`,
+        ...(provider === "kakao"
+          ? { queryParams: { prompt: "login" } }
+          : {}),
       },
     });
 
     if (error) {
       setSaving(false);
-      setFeedback({
+      setIdentityFeedback({
         type: "error",
-        message: "카카오 재인증을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+        message: `${providerLabel} 재인증을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.`,
       });
     }
   }
 
-  async function handleEmailReauthentication(
-    target: "profile" | "identity",
-  ) {
-    const setFeedback =
-      target === "profile" ? setProfileFeedback : setIdentityFeedback;
+  async function handleEmailReauthentication() {
     const supabase = getSupabaseBrowserClient();
 
     if (!supabase || !email) {
-      setFeedback({
+      setIdentityFeedback({
         type: "error",
-        message: "등록 이메일을 확인할 수 없습니다. 카카오 재인증을 이용해 주세요.",
+        message: "등록 이메일을 확인할 수 없습니다. 소셜 계정 재인증을 이용해 주세요.",
       });
       return;
     }
 
     setSaving(true);
-    setFeedback(null);
+    setIdentityFeedback(null);
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
@@ -331,7 +324,7 @@ export function ProfileForm({
     setSaving(false);
 
     if (error) {
-      setFeedback({
+      setIdentityFeedback({
         type: "error",
         message: "인증 메일을 보내지 못했습니다. 잠시 후 다시 시도해 주세요.",
       });
@@ -339,13 +332,13 @@ export function ProfileForm({
     }
 
     setReauthEmailSent(true);
-    setFeedback({
+    setIdentityFeedback({
       type: "success",
       message: "등록 이메일로 1회용 인증 링크를 보냈습니다.",
     });
   }
 
-  function renderReauthentication(target: "profile" | "identity") {
+  function renderReauthentication() {
     if (hasRecentEmailAuth) {
       return (
         <p className="rounded-sm bg-primary/5 px-4 py-3 text-xs text-primary">
@@ -370,7 +363,7 @@ export function ProfileForm({
           </label>
           <button
             type="button"
-            onClick={() => handleEmailReauthentication(target)}
+            onClick={handleEmailReauthentication}
             disabled={saving || reauthEmailSent}
             className="text-xs font-medium text-primary underline underline-offset-4 disabled:opacity-50"
           >
@@ -386,7 +379,7 @@ export function ProfileForm({
       return (
         <button
           type="button"
-          onClick={() => handleEmailReauthentication(target)}
+          onClick={handleEmailReauthentication}
           disabled={saving || reauthEmailSent}
           className="h-11 w-fit rounded-full border border-primary/20 px-5 text-sm font-medium text-primary disabled:opacity-50"
         >
@@ -395,10 +388,11 @@ export function ProfileForm({
       );
     }
 
-    if (hasRecentKakaoAuth) {
+    if (hasRecentSocialAuth) {
       return (
         <p className="rounded-sm bg-primary/5 px-4 py-3 text-xs text-primary">
-          카카오 계정 재인증이 완료되었습니다. 5분 안에 저장해 주세요.
+          {socialProvider === "naver" ? "네이버" : "카카오"} 계정 재인증이
+          완료되었습니다. 5분 안에 저장해 주세요.
         </p>
       );
     }
@@ -406,11 +400,15 @@ export function ProfileForm({
     return (
       <button
         type="button"
-        onClick={() => handleKakaoReauthentication(target)}
+        onClick={handleSocialReauthentication}
         disabled={saving}
-        className="h-11 w-fit rounded-full bg-[#FEE500] px-5 text-sm font-medium text-[#191919] disabled:opacity-50"
+        className={`h-11 w-fit rounded-full px-5 text-sm font-medium disabled:opacity-50 ${
+          socialProvider === "naver"
+            ? "bg-[#03C75A] text-white"
+            : "bg-[#FEE500] text-[#191919]"
+        }`}
       >
-        카카오 계정으로 다시 인증
+        {socialProvider === "naver" ? "네이버" : "카카오"} 계정으로 다시 인증
       </button>
     );
   }
@@ -458,38 +456,27 @@ export function ProfileForm({
   }
 
   return (
-    <div className="flex min-w-0 flex-col gap-6">
-      <section className="rounded-sm border border-border bg-surface">
-        <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-5 sm:px-7">
-          <div>
-            <h2 className="font-display text-2xl font-medium text-primary">
-              기본 정보
-            </h2>
-            <p className="mt-1 text-xs text-foreground/45">
-              사이트에서 사용할 닉네임을 관리합니다.
-            </p>
-          </div>
-          {!isEditing && (
-            <button
-              type="button"
-              onClick={() => {
-                setDraftNickname(nickname);
-                setProfileFeedback(null);
-                setIsEditing(true);
-              }}
-              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-primary/20 px-4 text-xs font-medium text-primary transition-colors hover:bg-primary hover:text-background"
-            >
-              <Pencil className="h-3.5 w-3.5" aria-hidden />
-              정보 수정
-            </button>
-          )}
+    <div className="grid gap-7 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
+      <aside className="rounded-sm border border-border bg-surface p-6 lg:sticky lg:top-24">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-background">
+          <UserRound className="h-6 w-6" aria-hidden />
         </div>
+        <p className="mt-6 font-display text-2xl font-medium text-primary">
+          {name ? `${name}님` : "회원님"}
+        </p>
+        <p className="mt-1 break-all text-sm text-foreground/50">{email}</p>
 
-        {isEditing ? (
-          <form onSubmit={handleProfileSubmit} className="p-5 sm:p-7">
-            <label className="flex flex-col gap-2 text-sm text-foreground/65">
-              닉네임
+        <div className="mt-7 border-t border-border pt-5">
+          {isEditing ? (
+            <form onSubmit={handleProfileSubmit}>
+              <label
+                htmlFor="profile-nickname"
+                className="text-xs text-foreground/50"
+              >
+                닉네임
+              </label>
               <input
+                id="profile-nickname"
                 type="text"
                 value={draftNickname}
                 onChange={(event) => setDraftNickname(event.target.value)}
@@ -498,57 +485,66 @@ export function ProfileForm({
                 required
                 autoComplete="nickname"
                 placeholder="2~20자로 입력해 주세요"
-                className="h-12 rounded-sm border border-border bg-background px-4 text-base text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary"
+                className="mt-2 h-11 w-full rounded-sm border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary"
               />
-            </label>
-            <div className="mt-4">{renderReauthentication("profile")}</div>
-            <div className="mt-5 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setDraftNickname(nickname);
-                  setIsEditing(false);
-                  setProfileFeedback(null);
-                }}
-                className="inline-flex h-11 items-center gap-1.5 rounded-full border border-border px-5 text-sm text-foreground/60 transition-colors hover:border-primary/30 hover:text-primary"
-              >
-                <X className="h-4 w-4" aria-hidden />
-                취소
-              </button>
-              <button
-                type="submit"
-                disabled={
-                  saving ||
-                  draftNickname.trim() === nickname ||
-                  (!hasEmailPassword &&
-                    !hasRecentEmailAuth &&
-                    !hasRecentKakaoAuth)
-                }
-                className="inline-flex h-11 items-center gap-1.5 rounded-full bg-primary px-5 text-sm text-background transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <Check className="h-4 w-4" aria-hidden />
-                {saving ? "저장 중..." : "변경사항 저장"}
-              </button>
+              <div className="mt-3 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDraftNickname(nickname);
+                    setIsEditing(false);
+                    setProfileFeedback(null);
+                  }}
+                  className="inline-flex h-9 items-center gap-1 rounded-full border border-border px-3 text-xs text-foreground/60 transition-colors hover:border-primary/30 hover:text-primary"
+                >
+                  <X className="h-3.5 w-3.5" aria-hidden />
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving || draftNickname.trim() === nickname}
+                  className="inline-flex h-9 items-center gap-1 rounded-full bg-primary px-3 text-xs text-background transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <Check className="h-3.5 w-3.5" aria-hidden />
+                  {saving ? "저장 중..." : "저장"}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="min-w-0">
+              <span className="text-xs text-foreground/50">닉네임</span>
+              <div className="mt-1 flex items-center gap-1">
+                <p className="break-all text-lg font-medium text-primary">
+                  {nickname || "미등록"}
+                </p>
+                <button
+                  type="button"
+                  aria-label="닉네임 변경"
+                  title="닉네임 변경"
+                  onClick={() => {
+                    setDraftNickname(nickname);
+                    setProfileFeedback(null);
+                    setIsEditing(true);
+                  }}
+                  className="inline-flex h-6 w-6 shrink-0 items-center justify-center text-primary/55 transition-colors hover:text-primary"
+                >
+                  <Pencil className="h-2.5 w-2.5" aria-hidden />
+                </button>
+              </div>
             </div>
-          </form>
-        ) : (
-          <div className="px-5 sm:px-7">
-            <ReadonlyField label="닉네임" value={nickname} />
-            <ReadonlyField
-              label="이메일"
-              value={email}
-              helper="로그인에 사용하는 이메일은 변경할 수 없습니다."
-            />
-          </div>
-        )}
+          )}
+        </div>
+
         {profileFeedback && (
-          <div className="px-5 pb-5 sm:px-7 sm:pb-7">
+          <div className="mt-4">
             <Feedback type={profileFeedback.type}>
               {profileFeedback.message}
             </Feedback>
           </div>
         )}
-      </section>
+      </aside>
+
+      <div className="flex min-w-0 flex-col gap-6">
 
       <section className="rounded-sm border border-border bg-surface">
         <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-5 sm:px-7">
@@ -609,25 +605,14 @@ export function ProfileForm({
                 className="h-12 rounded-sm border border-border bg-background px-4 text-base text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary"
               />
             </label>
-            <label className="flex flex-col gap-2 text-sm text-foreground/65">
-              생년월일 <span className="text-xs text-foreground/40">(선택)</span>
-              <input
-                type="date"
-                name="birth"
-                defaultValue={birth}
-                autoComplete="bday"
-                max={new Date().toISOString().split("T")[0]}
-                className="h-12 rounded-sm border border-border bg-background px-4 text-base text-foreground outline-none transition-colors focus:border-primary"
-              />
-            </label>
-            {renderReauthentication("identity")}
+            {renderReauthentication()}
             <label className="flex cursor-pointer items-start gap-3 rounded-sm bg-primary/5 p-4 text-xs leading-relaxed text-foreground/65">
               <input
                 type="checkbox"
                 required
                 className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
               />
-              변경할 성명·휴대폰 번호·생년월일이 정확한지 확인했습니다.
+              변경할 성명·휴대폰 번호가 정확한지 확인했습니다.
             </label>
             <div className="flex justify-end gap-2">
               <button
@@ -643,7 +628,7 @@ export function ProfileForm({
                   saving ||
                   (!hasEmailPassword &&
                     !hasRecentEmailAuth &&
-                    !hasRecentKakaoAuth)
+                    !hasRecentSocialAuth)
                 }
                 className="h-11 rounded-full bg-primary px-5 text-sm text-background transition-colors hover:bg-primary/90 disabled:opacity-50"
               >
@@ -668,8 +653,8 @@ export function ProfileForm({
         <div className="flex items-start gap-3 border-t border-border bg-background/45 px-5 py-4 sm:px-7">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary/60" aria-hidden />
           <p className="text-xs leading-relaxed text-foreground/45">
-            성명·휴대폰·생년월일은 현재 비밀번호 또는 등록 이메일 인증 후 직접
-            변경할 수 있습니다.
+            성명·휴대폰은 본인확인 후 변경할 수 있습니다. 생년월일은 가입 후
+            변경할 수 없습니다.
           </p>
         </div>
       </section>
@@ -858,8 +843,10 @@ export function ProfileForm({
 
       <AccountDeletion
         hasEmailPassword={hasEmailPassword}
-        hasRecentKakaoAuth={hasRecentKakaoAuth}
+        socialProvider={socialProvider}
+        hasRecentSocialAuth={hasRecentSocialAuth}
       />
+      </div>
     </div>
   );
 }

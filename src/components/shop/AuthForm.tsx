@@ -229,9 +229,6 @@ export function AuthForm({
       provider: provider === "kakao" ? "kakao" : "custom:naver",
       options: {
         redirectTo: `${window.location.origin}/auth/callback?next=/`,
-        ...(provider === "kakao"
-          ? { scopes: "profile_nickname profile_image" }
-          : {}),
       },
     });
 

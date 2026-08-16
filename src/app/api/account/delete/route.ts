@@ -53,16 +53,22 @@ export async function POST(request: Request) {
       );
     }
   } else {
-    const hasKakaoIdentity = user.identities?.some(
+    const socialProvider = user.identities?.some(
       (identity) => identity.provider === "kakao",
-    );
+    )
+      ? "kakao"
+      : user.identities?.some(
+            (identity) => identity.provider === "custom:naver",
+          )
+        ? "naver"
+        : null;
     const cookieStore = await cookies();
-    const hasRecentKakaoAuth =
-      cookieStore.get("pi_account_reauth")?.value === "kakao";
+    const hasRecentSocialAuth =
+      cookieStore.get("pi_account_reauth")?.value === socialProvider;
 
-    if (!hasKakaoIdentity || !hasRecentKakaoAuth) {
+    if (!socialProvider || !hasRecentSocialAuth) {
       return NextResponse.json(
-        { message: "회원탈퇴 전 카카오 계정으로 다시 인증해 주세요." },
+        { message: "회원탈퇴 전 소셜 계정으로 다시 인증해 주세요." },
         { status: 403 },
       );
     }

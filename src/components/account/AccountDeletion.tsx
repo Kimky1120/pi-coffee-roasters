@@ -7,17 +7,21 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export function AccountDeletion({
   hasEmailPassword,
-  hasRecentKakaoAuth,
+  socialProvider,
+  hasRecentSocialAuth,
 }: {
   hasEmailPassword: boolean;
-  hasRecentKakaoAuth: boolean;
+  socialProvider: "kakao" | "naver" | null;
+  hasRecentSocialAuth: boolean;
 }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  async function handleKakaoReauthentication() {
+  async function handleSocialReauthentication() {
+    const provider = socialProvider ?? "kakao";
+    const providerLabel = provider === "naver" ? "네이버" : "카카오";
     setErrorMessage(null);
     const supabase = getSupabaseBrowserClient();
     if (!supabase) {
@@ -27,16 +31,20 @@ export function AccountDeletion({
 
     setSubmitting(true);
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: "kakao",
+      provider: provider === "naver" ? "custom:naver" : "kakao",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/account?verified=kakao`,
-        queryParams: { prompt: "login" },
+        redirectTo: `${window.location.origin}/auth/callback?next=/account?verified=${provider}`,
+        ...(provider === "kakao"
+          ? { queryParams: { prompt: "login" } }
+          : {}),
       },
     });
 
     if (error) {
       setSubmitting(false);
-      setErrorMessage("카카오 계정 인증을 시작하지 못했습니다. 다시 시도해 주세요.");
+      setErrorMessage(
+        `${providerLabel} 계정 인증을 시작하지 못했습니다. 다시 시도해 주세요.`,
+      );
     }
   }
 
@@ -92,7 +100,7 @@ export function AccountDeletion({
             탈퇴 후 계정과 회원정보는 복구할 수 없습니다.
           </p>
         </div>
-        {!isOpen && (hasEmailPassword || hasRecentKakaoAuth) && (
+        {!isOpen && (hasEmailPassword || hasRecentSocialAuth) && (
           <button
             type="button"
             onClick={() => setIsOpen(true)}
@@ -102,14 +110,16 @@ export function AccountDeletion({
             탈퇴하기
           </button>
         )}
-        {!isOpen && !hasEmailPassword && !hasRecentKakaoAuth && (
+        {!isOpen && !hasEmailPassword && !hasRecentSocialAuth && (
           <button
             type="button"
-            onClick={handleKakaoReauthentication}
+            onClick={handleSocialReauthentication}
             disabled={submitting}
             className="inline-flex h-10 w-fit items-center gap-2 rounded-full border border-red-900/20 px-4 text-xs font-medium text-red-800 transition-colors hover:bg-red-900 hover:text-white disabled:opacity-50"
           >
-            {submitting ? "카카오 인증 중..." : "카카오 인증 후 탈퇴"}
+            {submitting
+              ? `${socialProvider === "naver" ? "네이버" : "카카오"} 인증 중...`
+              : `${socialProvider === "naver" ? "네이버" : "카카오"} 인증 후 탈퇴`}
           </button>
         )}
       </div>
@@ -150,7 +160,8 @@ export function AccountDeletion({
               </label>
             ) : (
               <p className="rounded-sm bg-primary/5 px-4 py-3 text-xs leading-relaxed text-foreground/55">
-                방금 다시 인증한 카카오 계정의 회원정보가 삭제됩니다.
+                방금 다시 인증한 {socialProvider === "naver" ? "네이버" : "카카오"}
+                계정의 회원정보가 삭제됩니다.
               </p>
             )}
 

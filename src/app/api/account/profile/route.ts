@@ -7,13 +7,11 @@ type ProfileUpdateBody =
   | {
       action: "nickname";
       nickname?: string;
-      currentPassword?: string;
     }
   | {
       action: "identity";
       name?: string;
       phone?: string;
-      birth?: string;
       currentPassword?: string;
     }
   | {
@@ -44,7 +42,7 @@ export async function POST(request: Request) {
     user.app_metadata.provider === "email";
   const cookieStore = await cookies();
   const recentReauthentication = cookieStore.get("pi_account_reauth")?.value;
-  const requiresReauthentication = body.action !== "marketing";
+  const requiresReauthentication = body.action === "identity";
 
   if (requiresReauthentication && recentReauthentication === "email") {
     // 등록 이메일로 받은 1회용 링크를 방금 확인한 경우
@@ -62,13 +60,19 @@ export async function POST(request: Request) {
       return errorResponse("현재 비밀번호가 올바르지 않습니다.", 403);
     }
   } else if (requiresReauthentication) {
-    const hasKakaoIdentity = user.identities?.some(
+    const socialProvider = user.identities?.some(
       (identity) => identity.provider === "kakao",
-    );
-    const hasRecentKakaoAuth = recentReauthentication === "kakao";
+    )
+      ? "kakao"
+      : user.identities?.some(
+            (identity) => identity.provider === "custom:naver",
+          )
+        ? "naver"
+        : null;
+    const hasRecentSocialAuth = recentReauthentication === socialProvider;
 
-    if (!hasKakaoIdentity || !hasRecentKakaoAuth) {
-      return errorResponse("카카오 계정 재인증이 필요합니다.", 403);
+    if (!socialProvider || !hasRecentSocialAuth) {
+      return errorResponse("소셜 계정 재인증이 필요합니다.", 403);
     }
   }
 
@@ -90,7 +94,7 @@ export async function POST(request: Request) {
     } else {
       const { data: currentProfile, error: profileError } = await admin
         .from("profiles")
-        .select("name, phone, birth")
+        .select("name, phone")
         .eq("id", user.id)
         .single();
 
@@ -100,7 +104,6 @@ export async function POST(request: Request) {
 
       const name = body.name?.trim() ?? "";
       const phone = body.phone?.trim() ?? "";
-      const birth = body.birth?.trim() ?? "";
 
       if (name.length < 2 || name.length > 30) {
         return errorResponse("성명은 2자 이상 30자 이하로 입력해 주세요.", 400);
@@ -111,20 +114,12 @@ export async function POST(request: Request) {
           400,
         );
       }
-      if (birth && !/^\d{4}-\d{2}-\d{2}$/.test(birth)) {
-        return errorResponse("생년월일을 확인해 주세요.", 400);
-      }
-
       if (name !== (currentProfile.name ?? "")) {
         updates.name = name;
       }
       if (phone !== (currentProfile.phone ?? "")) {
         updates.phone = phone;
       }
-      if (birth !== (currentProfile.birth ?? "")) {
-        updates.birth = birth || null;
-      }
-
       if (Object.keys(updates).length === 0) {
         return errorResponse("새로 등록할 정보가 없습니다.", 400);
       }

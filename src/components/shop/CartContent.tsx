@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
@@ -20,9 +20,14 @@ import { PreparationNotice } from "./PreparationNotice";
 
 export function CartContent({
   checkoutAvailable,
+  shippingFee,
+  freeShippingThreshold,
 }: {
   checkoutAvailable: boolean;
+  shippingFee: number;
+  freeShippingThreshold: number | null;
 }) {
+  const [clearDialogOpen, setClearDialogOpen] = useState(false);
   const items = useSyncExternalStore(
     subscribeCart,
     getCartSnapshot,
@@ -75,6 +80,14 @@ export function CartContent({
     (total, item) => total + item.price * item.quantity,
     0,
   );
+  const qualifiesForFreeShipping =
+    freeShippingThreshold !== null && subtotal >= freeShippingThreshold;
+  const appliedShippingFee = qualifiesForFreeShipping ? 0 : shippingFee;
+  const totalAmount = subtotal + appliedShippingFee;
+  const amountUntilFreeShipping =
+    freeShippingThreshold === null
+      ? null
+      : Math.max(0, freeShippingThreshold - subtotal);
 
   return (
     <main className="min-h-[calc(100vh-4rem)] flex-1 bg-background px-6 py-28 sm:py-32">
@@ -93,7 +106,7 @@ export function CartContent({
           </div>
           <button
             type="button"
-            onClick={clearCart}
+            onClick={() => setClearDialogOpen(true)}
             className="text-sm text-foreground/50 underline-offset-4 transition-colors hover:text-primary hover:underline"
           >
             전체 비우기
@@ -189,19 +202,39 @@ export function CartContent({
 
           <aside className="rounded-sm border border-border bg-surface p-6 lg:sticky lg:top-24">
             <h2 className="font-display text-2xl font-medium text-primary">
-              주문 요약
+              결제 금액
             </h2>
             <div className="mt-6 flex items-center justify-between border-b border-border pb-5 text-sm">
-              <span className="text-foreground/60">상품 수량</span>
+              <span className="text-foreground/60">주문 상품</span>
               <span className="text-primary">{totalQuantity}개</span>
             </div>
-            <div className="flex items-end justify-between pt-5">
-              <span className="text-sm text-foreground/60">상품 합계</span>
+            <div className="mt-5 flex items-center justify-between text-sm">
+              <span className="text-foreground/60">상품 금액</span>
+              <span className="text-primary">{formatPrice(subtotal)}원</span>
+            </div>
+            <div className="mt-3 flex items-center justify-between text-sm">
+              <span className="text-foreground/60">배송비</span>
+              <span className="text-primary">
+                {appliedShippingFee === 0
+                  ? "무료배송"
+                  : `${formatPrice(appliedShippingFee)}원`}
+              </span>
+            </div>
+            <div className="mt-5 flex items-end justify-between border-t border-border pt-5">
+              <span className="text-sm text-foreground/60">총 결제 금액</span>
               <strong className="font-display text-3xl font-medium text-primary">
-                {formatPrice(subtotal)}
+                {formatPrice(totalAmount)}
                 <span className="ml-1 font-sans text-base font-normal">원</span>
               </strong>
             </div>
+
+            {amountUntilFreeShipping !== null && (
+              <p className="mt-5 rounded-sm bg-primary/5 px-4 py-3 text-center text-xs leading-6 text-foreground/60">
+                {amountUntilFreeShipping > 0
+                  ? `무료배송까지 ${formatPrice(amountUntilFreeShipping)}원 남았어요.`
+                  : "무료배송이 적용됐어요."}
+              </p>
+            )}
 
             {checkoutAvailable ? (
               <Link
@@ -228,6 +261,52 @@ export function CartContent({
           </aside>
         </div>
       </div>
+
+      {clearDialogOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-5"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setClearDialogOpen(false);
+          }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="clear-cart-title"
+            className="w-full max-w-sm rounded-sm border border-border bg-background p-6 shadow-2xl sm:p-7"
+          >
+            <h2
+              id="clear-cart-title"
+              className="font-display text-2xl font-medium text-primary"
+            >
+              장바구니를 모두 비울까요?
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-foreground/55">
+              담아둔 상품이 모두 삭제됩니다.
+            </p>
+            <div className="mt-7 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                autoFocus
+                onClick={() => setClearDialogOpen(false)}
+                className="h-11 rounded-full border border-primary text-sm text-primary transition-colors hover:bg-primary/5"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  clearCart();
+                  setClearDialogOpen(false);
+                }}
+                className="h-11 rounded-full bg-primary text-sm text-background transition-colors hover:bg-primary/90"
+              >
+                전체 비우기
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 }

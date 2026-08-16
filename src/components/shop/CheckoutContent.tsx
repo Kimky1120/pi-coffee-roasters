@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ANONYMOUS,
@@ -9,7 +10,15 @@ import {
   type WidgetAgreementWidget,
   type WidgetPaymentMethodWidget,
 } from "@tosspayments/tosspayments-sdk";
-import { CreditCard, LockKeyhole, ShoppingBag } from "lucide-react";
+import {
+  ArrowUpRight,
+  Clock3,
+  CreditCard,
+  LockKeyhole,
+  MapPin,
+  ShoppingBag,
+} from "lucide-react";
+import { SITE_CONFIG } from "@/constants/site";
 import { formatPrice } from "@/data/shop";
 import {
   getCartSnapshot,
@@ -528,22 +537,90 @@ export function CheckoutContent({
 
 function CheckoutUnavailable() {
   return (
-    <main className="flex min-h-[calc(100vh-4rem)] flex-1 items-center justify-center bg-background px-6 py-28">
-      <div className="w-full max-w-lg text-center">
-        <LockKeyhole className="mx-auto h-10 w-10 text-primary/50" aria-hidden />
-        <h1 className="mt-6 font-display text-4xl font-medium text-primary">
-          안전한 결제를 준비하고 있습니다
-        </h1>
-        <p className="mt-5 text-sm leading-7 text-foreground/60">
-          배송 정책, 주문 데이터베이스, 토스페이먼츠 테스트 설정이 모두
-          완료된 뒤 주문을 열겠습니다.
-        </p>
-        <Link
-          href="/cart"
-          className="mt-8 inline-flex h-12 items-center justify-center rounded-full border border-primary px-8 text-sm text-primary"
+    <main className="min-h-[calc(100vh-4rem)] flex-1 bg-background px-5 py-24 sm:px-8 sm:py-28">
+      <div className="mx-auto grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+        <section>
+          <span className="text-xs tracking-[0.2em] text-primary/50">
+            VISIT PI COFFEE
+          </span>
+          <h1 className="mt-4 font-display text-4xl font-medium tracking-tight text-primary sm:text-5xl">
+            파이커피로 오시는 길
+          </h1>
+          <p className="mt-6 text-base leading-8 text-foreground/60">
+            온라인 주문은 조금만 기다려 주세요.
+            <br />
+            그동안 매장에서 직접 만나요.
+          </p>
+
+          <div className="mt-8 flex flex-col gap-4 border-y border-border py-6">
+            <div className="flex items-start gap-3 text-sm leading-6">
+              <MapPin
+                className="mt-0.5 h-4 w-4 shrink-0 text-primary/60"
+                aria-hidden
+              />
+              <span className="text-primary">{SITE_CONFIG.contact.address}</span>
+            </div>
+            <div className="flex items-start gap-3 text-sm leading-6">
+              <Clock3
+                className="mt-0.5 h-4 w-4 shrink-0 text-primary/60"
+                aria-hidden
+              />
+              <span className="text-primary">{SITE_CONFIG.contact.hours}</span>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <a
+              href={SITE_CONFIG.contact.naverMapUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-7 text-sm text-background transition-colors hover:bg-primary/90"
+            >
+              네이버 지도에서 보기
+              <ArrowUpRight className="h-4 w-4" aria-hidden />
+            </a>
+            <Link
+              href="/cart"
+              className="inline-flex h-12 items-center justify-center rounded-full border border-primary px-7 text-sm text-primary transition-colors hover:bg-primary/5"
+            >
+              장바구니로 돌아가기
+            </Link>
+          </div>
+        </section>
+
+        <section
+          aria-label="파이커피로스터스 매장과 원두 사진"
+          className="grid grid-cols-2 gap-3"
         >
-          장바구니로 돌아가기
-        </Link>
+          <div className="relative col-span-2 aspect-[16/9] overflow-hidden rounded-sm bg-surface">
+            <Image
+              src="/images/gallery/gallery-09.jpg"
+              alt="파이커피로스터스 매장 외관"
+              fill
+              priority
+              sizes="(min-width: 1024px) 620px, calc(100vw - 40px)"
+              className="object-cover"
+            />
+          </div>
+          <div className="relative aspect-[4/3] overflow-hidden rounded-sm bg-surface">
+            <Image
+              src="/images/gallery/gallery-06.jpg"
+              alt="파이커피로스터스 원두 패키지"
+              fill
+              sizes="(min-width: 1024px) 300px, 50vw"
+              className="object-cover"
+            />
+          </div>
+          <div className="relative aspect-[4/3] overflow-hidden rounded-sm bg-surface">
+            <Image
+              src="/images/gallery/gallery-04.jpg"
+              alt="파이커피로스터스 커피 커핑 테이블"
+              fill
+              sizes="(min-width: 1024px) 300px, 50vw"
+              className="object-cover"
+            />
+          </div>
+        </section>
       </div>
     </main>
   );

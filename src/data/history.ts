@@ -14,6 +14,6 @@ export const HISTORY_ITEMS: HistoryItem[] = [
   },
   {
     date: "2026. 08",
-    title: "2026 World Best Roasting Championship Finalist",
+    title: "2026 World Best Roasting Championship Competitor",
   },
 ];

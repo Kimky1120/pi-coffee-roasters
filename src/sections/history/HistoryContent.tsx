@@ -27,7 +27,7 @@ export function HistoryContent({ items }: { items: HistoryItem[] }) {
       <SectionIntro
         eyebrow="03 — History"
         title="History"
-        description="파이커피로스터스가 쌓아온 시간과 기록입니다."
+        description="파이커피로스터스가 걸어온 여정입니다."
         tone="light"
       />
 

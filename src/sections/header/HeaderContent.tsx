@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  type MouseEvent as ReactMouseEvent,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -111,6 +117,26 @@ export function HeaderContent() {
     router.refresh();
   }
 
+  function handleSectionClick(
+    event: ReactMouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) {
+    setMenuOpen(false);
+
+    if (pathname !== "/" || !href.startsWith("/#")) return;
+
+    const hash = href.slice(1);
+    const section = document.querySelector(hash);
+    if (!section) return;
+
+    event.preventDefault();
+    window.history.replaceState(null, "", hash);
+    section.scrollIntoView({
+      behavior: shouldReduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
+  }
+
   return (
     <header
       className={cn(
@@ -144,6 +170,7 @@ export function HeaderContent() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={(event) => handleSectionClick(event, item.href)}
               className={cn(
                 "font-sans text-sm tracking-wide transition-colors duration-300 ease-out",
                 solidHeader
@@ -291,7 +318,7 @@ export function HeaderContent() {
                   >
                     <Link
                       href={item.href}
-                      onClick={() => setMenuOpen(false)}
+                      onClick={(event) => handleSectionClick(event, item.href)}
                       className="flex items-baseline justify-between py-4 text-primary"
                     >
                       <span className="font-display text-3xl">{item.label}</span>

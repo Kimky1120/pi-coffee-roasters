@@ -54,7 +54,19 @@ export const GALLERY_IMAGES: GalleryImage[] = [
   },
   {
     src: "/images/gallery/gallery-10-front.jpg",
-    alt: "2026 월드 베스트 로스팅 챔피언십 결선 진출 인증서와 참가자 명찰",
+    alt: "2026 월드 베스트 로스팅 챔피언십 TOP 60 인증서와 참가자 명찰",
     aspect: "landscape",
+  },
+  {
+    src: "/images/gallery/gallery-11-wbr-weighing.jpg",
+    alt: "월드 베스트 로스팅 챔피언십에서 원두를 계량하는 과정",
+    aspect: "portrait",
+    objectPosition: "center",
+  },
+  {
+    src: "/images/gallery/gallery-12-wbr-roasting.jpg",
+    alt: "월드 베스트 로스팅 챔피언십에서 로스터를 운용하는 모습",
+    aspect: "portrait",
+    objectPosition: "center",
   },
 ];

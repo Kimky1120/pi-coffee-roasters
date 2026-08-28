@@ -52,4 +52,9 @@ export const GALLERY_IMAGES: GalleryImage[] = [
     alt: "PI Coffee Roasters 매장 외관과 사이니지",
     aspect: "landscape",
   },
+  {
+    src: "/images/gallery/gallery-10-front.jpg",
+    alt: "2026 월드 베스트 로스팅 챔피언십 결선 진출 인증서와 참가자 명찰",
+    aspect: "landscape",
+  },
 ];

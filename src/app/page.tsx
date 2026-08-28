@@ -1,5 +1,6 @@
 import { Hero } from "@/sections/hero/Hero";
 import { About } from "@/sections/about/About";
+import { History } from "@/sections/history/History";
 import { OurCoffee } from "@/sections/our-coffee/OurCoffee";
 import { Roasting } from "@/sections/roasting/Roasting";
 import { Wholesale } from "@/sections/wholesale/Wholesale";
@@ -30,6 +31,7 @@ export default async function Home({
       {authMessage && <AuthNotice message={authMessage} />}
       <Hero />
       <About />
+      <History />
       <OurCoffee />
       <Roasting />
       <Wholesale />

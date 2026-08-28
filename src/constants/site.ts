@@ -78,8 +78,7 @@ export const SITE_CONFIG = {
     email: "picoffeeroasters@naver.com",
     instagramUrl:
       "https://www.instagram.com/picoffee.roasters?igsh=MW94Z3kzc3g2Z3R5bg==",
-    naverMapUrl:
-      "https://map.naver.com/p/search/%ED%8C%8C%EC%9D%B4%EC%BB%A4%ED%94%BC%EB%A1%9C%EC%8A%A4%ED%84%B0%EC%8A%A4/place/1636074052?placePath=%3Fbk_query%3D%25ED%258C%258C%25EC%259D%25B4%25EC%25BB%25A4%25ED%2594%25BC%25EB%25A1%259C%25EC%258A%25A4%25ED%2584%25B0%25EC%258A%25A4%26entry%3Dpll%26from%3Dnx%26fromNxList%3Dtrue&placeSearchOption=bk_query%3D%25ED%258C%258C%25EC%259D%25B4%25EC%25BB%25A4%25ED%2594%25BC%25EB%25A1%259C%25EC%258A%25A4%25ED%2584%25B0%25EC%258A%25A4%26entry%3Dpll%26fromNxList%3Dtrue&searchType=place",
+    naverMapUrl: "https://naver.me/I55pLmk8",
     googleMapUrl: "",
   } as Record<
     | "address"
@@ -91,4 +90,16 @@ export const SITE_CONFIG = {
     | "googleMapUrl",
     string
   >,
+  locations: [
+    {
+      label: "1호점",
+      name: "파이커피",
+      naverMapUrl: "https://naver.me/xcntanJv",
+    },
+    {
+      label: "2호점",
+      name: "파이커피로스터스",
+      naverMapUrl: "https://naver.me/I55pLmk8",
+    },
+  ],
 } as const;

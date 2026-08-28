@@ -25,7 +25,7 @@ export function RoastingContent({ steps }: { steps: RoastingStep[] }) {
   return (
     <div className="flex flex-col gap-16">
       <SectionIntro
-        eyebrow="04 — Roasting"
+        eyebrow="05 — Roasting"
         title="Roasting Philosophy"
         description="우리는 로스팅으로 원두를 바꾸지 않습니다. 원두가 가진 본연의 목소리를 가장 정확하게 전달할 뿐입니다."
         tone="light"

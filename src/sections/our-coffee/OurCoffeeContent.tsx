@@ -31,7 +31,7 @@ export function OurCoffeeContent({ beans }: { beans: CoffeeBean[] }) {
   return (
     <div className="flex flex-col gap-16">
       <SectionIntro
-        eyebrow="03 — Our Coffee"
+        eyebrow="04 — Our Coffee"
         title="Our Coffee"
         description={OUR_COFFEE_SUBTITLE}
       />

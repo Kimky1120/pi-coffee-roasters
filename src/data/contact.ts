@@ -10,6 +10,5 @@ export const CONTACT_CHANNELS: ContactChannel[] = [
   { key: "phone", label: "전화" },
   { key: "email", label: "이메일" },
   { key: "instagramUrl", label: "Instagram" },
-  { key: "naverMapUrl", label: "네이버 지도" },
   { key: "googleMapUrl", label: "Google 지도" },
 ];

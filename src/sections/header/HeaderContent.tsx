@@ -120,7 +120,7 @@ export function HeaderContent() {
           : "border-transparent bg-transparent",
       )}
     >
-      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-6 sm:h-16">
+      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-6 sm:h-16 lg:gap-[clamp(1.25rem,2.5vw,2.5rem)]">
         <Link href="/#hero" className="shrink-0" onClick={() => setMenuOpen(false)}>
           <Image
             src={
@@ -132,11 +132,14 @@ export function HeaderContent() {
             width={921}
             height={417}
             priority
-            className="h-auto w-[100px] object-contain sm:w-[125px]"
+            className="h-auto w-[clamp(100px,14vw,125px)] object-contain lg:w-[clamp(106px,11vw,125px)]"
           />
         </Link>
 
-        <nav aria-label="주요 메뉴" className="hidden items-center gap-7 md:flex">
+        <nav
+          aria-label="주요 메뉴"
+          className="hidden min-w-0 flex-1 items-center justify-center gap-[clamp(1rem,2.1vw,1.75rem)] lg:flex"
+        >
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
@@ -244,7 +247,7 @@ export function HeaderContent() {
             aria-controls="mobile-menu"
             aria-label={menuOpen ? "메뉴 닫기" : "메뉴 열기"}
             className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300 ease-out md:hidden",
+              "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300 ease-out lg:hidden",
               solidHeader ? "text-primary" : "text-background",
             )}
           >
@@ -268,7 +271,7 @@ export function HeaderContent() {
               duration: shouldReduceMotion ? 0 : DURATION.item,
               ease: EASE,
             }}
-            className="fixed inset-x-0 top-14 h-[calc(100dvh-3.5rem)] border-t border-border bg-background sm:top-16 sm:h-[calc(100dvh-4rem)] md:hidden"
+            className="fixed inset-x-0 top-14 h-[calc(100dvh-3.5rem)] border-t border-border bg-background sm:top-16 sm:h-[calc(100dvh-4rem)] lg:hidden"
           >
             <nav
               aria-label="모바일 메뉴"

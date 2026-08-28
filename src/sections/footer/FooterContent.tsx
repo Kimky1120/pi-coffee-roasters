@@ -2,10 +2,9 @@
 
 import Image from "next/image";
 import { ArrowUp } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "framer-motion";
 import type { NavItem } from "@/constants/nav";
 import type { ContactChannel, ContactChannelKey, ContactInfo } from "@/types/contact";
-import { DURATION, EASE, OFFSET } from "@/lib/motion";
 
 function getChannelHref(key: ContactChannelKey, value: string): string | undefined {
   switch (key) {
@@ -52,13 +51,7 @@ export function FooterContent({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: shouldReduceMotion ? 0 : OFFSET }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.4 }}
-      transition={{ duration: DURATION.block, ease: EASE }}
-      className="flex flex-col gap-16"
-    >
+    <div className="flex flex-col gap-16">
       <div className="grid gap-6 sm:grid-cols-3 sm:gap-8">
         <div className="flex flex-col gap-2">
           <Image
@@ -138,6 +131,6 @@ export function FooterContent({
           <ArrowUp className="h-4 w-4" aria-hidden />
         </button>
       </div>
-    </motion.div>
+    </div>
   );
 }

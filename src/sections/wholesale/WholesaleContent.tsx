@@ -58,7 +58,7 @@ export function WholesaleContent({
   return (
     <div className="flex flex-col gap-16">
       <SectionIntro
-        eyebrow="05 — Wholesale"
+        eyebrow="06 — Wholesale"
         title="Wholesale"
         description="매장에 어울리는 원두를 고르고, 매일 같은 맛을 낼 수 있는 기준까지 함께 만듭니다."
       />

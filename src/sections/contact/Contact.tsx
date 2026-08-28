@@ -12,6 +12,7 @@ export function Contact() {
         <ContactContent
           channels={CONTACT_CHANNELS}
           contact={SITE_CONFIG.contact}
+          locations={SITE_CONFIG.locations}
           kakaoChatUrl={SITE_CONFIG.kakaoChatUrl}
         />
       </div>

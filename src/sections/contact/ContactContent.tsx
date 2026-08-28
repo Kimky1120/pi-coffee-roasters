@@ -53,10 +53,16 @@ function getChannelDisplayValue(
 export function ContactContent({
   channels,
   contact,
+  locations,
   kakaoChatUrl,
 }: {
   channels: ContactChannel[];
   contact: ContactInfo;
+  locations: readonly {
+    label: string;
+    name: string;
+    naverMapUrl: string;
+  }[];
   kakaoChatUrl: string;
 }) {
   const shouldReduceMotion = useReducedMotion();
@@ -72,7 +78,7 @@ export function ContactContent({
   return (
     <div className="flex flex-col gap-16">
       <SectionIntro
-        eyebrow="07 — Contact"
+        eyebrow="08 — Contact"
         title="Contact"
         description="천안 안서동 파이커피로스터스와 함께할 새로운 공간을 기다립니다."
       />
@@ -118,6 +124,34 @@ export function ContactContent({
             <p className="font-sans text-base leading-relaxed text-foreground/60">
               연락처 정보는 준비 중입니다.
             </p>
+          )}
+
+          {locations.length > 0 && (
+            <div className="flex items-start gap-4">
+              <div className="mt-8 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/5 text-primary">
+                <MapPin className="h-4 w-4" aria-hidden />
+              </div>
+              <div className="flex min-w-0 flex-col gap-1">
+                <span className="font-sans text-xs tracking-[0.15em] text-foreground/50">
+                  네이버 지도
+                </span>
+                <div className="flex flex-col gap-2">
+                  {locations.map((location) => (
+                    <div key={location.label} className="flex items-baseline gap-2">
+                    <a
+                      href={location.naverMapUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${location.label} ${location.name} 네이버 지도에서 보기`}
+                      className="font-sans text-base text-primary underline-offset-4 hover:underline sm:text-lg"
+                    >
+                      {location.label} {location.name}
+                    </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           )}
         </motion.div>
 

@@ -25,11 +25,16 @@ function formatChangedAt(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "기록 없음";
 
-  return new Intl.DateTimeFormat("ko-KR", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "Asia/Seoul",
-  }).format(date);
+  const koreaTime = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  const year = koreaTime.getUTCFullYear();
+  const month = koreaTime.getUTCMonth() + 1;
+  const day = koreaTime.getUTCDate();
+  const hour24 = koreaTime.getUTCHours();
+  const period = hour24 < 12 ? "오전" : "오후";
+  const hour12 = hour24 % 12 || 12;
+  const minute = String(koreaTime.getUTCMinutes()).padStart(2, "0");
+
+  return `${year}. ${month}. ${day}. ${period} ${hour12}:${minute}`;
 }
 
 function ReadonlyField({

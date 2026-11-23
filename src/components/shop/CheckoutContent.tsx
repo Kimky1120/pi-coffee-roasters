@@ -122,7 +122,14 @@ export function CheckoutContent({
     const clientKey = quoteResponse?.clientKey;
     const quote = quoteResponse?.quote;
 
-    if (!quoteResponse?.checkoutReady || !clientKey || !quote) return;
+    if (
+      loading ||
+      cart.length === 0 ||
+      !quoteResponse?.checkoutReady ||
+      (!quoteResponse.authenticated && !quoteResponse.allowGuestCheckout) ||
+      !clientKey ||
+      !quote
+    ) return;
 
     let active = true;
     let paymentWidget: WidgetPaymentMethodWidget | null = null;
@@ -131,6 +138,7 @@ export function CheckoutContent({
     async function renderWidgets() {
       try {
         setWidgetReady(false);
+        setRequiredTermsAgreed(false);
         const tossPayments = await loadTossPayments(clientKey as string);
         if (!active) return;
 
@@ -167,7 +175,7 @@ export function CheckoutContent({
       void paymentWidget?.destroy();
       void agreementWidget?.destroy();
     };
-  }, [quoteResponse]);
+  }, [quoteResponse, loading, cart.length]);
 
   function updateCustomer<K extends keyof CheckoutCustomer>(
     key: K,

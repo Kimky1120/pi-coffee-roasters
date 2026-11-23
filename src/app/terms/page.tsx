@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_CONFIG } from "@/constants/site";
 import { PolicyPage, type PolicySection } from "@/components/legal/PolicyPage";
 
 export const metadata: Metadata = {
@@ -56,7 +57,7 @@ const SECTIONS: PolicySection[] = [
   {
     title: "8. 문의",
     paragraphs: [
-      "이용약관 관련 문의: picoffeeroasters@naver.com · 010-8822-9428",
+      `이용약관 관련 문의: ${SITE_CONFIG.contact.email} · ${SITE_CONFIG.contact.phone}`,
     ],
   },
 ];

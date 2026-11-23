@@ -52,8 +52,13 @@ export const SITE_CONFIG = {
   locale: "ko_KR",
   url: SITE_URL,
   kakaoChatUrl,
+  business: {
+    name: "파이커피로스터스",
+    representative: "김준태 외 2명",
+    registrationNumber: "742-61-00712",
+  },
   businessAddress: {
-    streetAddress: "천호지길 27 2동 지하1층",
+    streetAddress: "천호지길 29, 2동 지하1층(안서동)",
     addressLocality: "천안시 동남구",
     addressRegion: "충청남도",
     addressCountry: "KR",
@@ -72,9 +77,9 @@ export const SITE_CONFIG = {
     closes: "21:00",
   },
   contact: {
-    address: "충남 천안시 동남구 천호지길 27 2동 지하1층",
+    address: "충남 천안시 동남구 천호지길 29, 2동 지하1층(안서동)",
     hours: "매일 09:00–21:00 · 라스트오더 20:50",
-    phone: "010-8822-9428",
+    phone: "0507-1418-8916",
     email: "picoffeeroasters@naver.com",
     instagramUrl:
       "https://www.instagram.com/picoffee.roasters?igsh=MW94Z3kzc3g2Z3R5bg==",

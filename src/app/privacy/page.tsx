@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_CONFIG } from "@/constants/site";
 import { PolicyPage, type PolicySection } from "@/components/legal/PolicyPage";
 
 export const metadata: Metadata = {
@@ -61,7 +62,7 @@ const SECTIONS: PolicySection[] = [
   {
     title: "8. 개인정보 보호 문의",
     paragraphs: [
-      "개인정보 관련 문의와 권리 행사는 picoffeeroasters@naver.com 또는 010-8822-9428로 접수할 수 있습니다.",
+      `개인정보 관련 문의와 권리 행사는 ${SITE_CONFIG.contact.email} 또는 ${SITE_CONFIG.contact.phone}로 접수할 수 있습니다.`,
     ],
   },
   {

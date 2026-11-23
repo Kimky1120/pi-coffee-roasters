@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Minus, Plus, ShoppingBag, Truck } from "lucide-react";
 import {
   formatPrice,
@@ -27,6 +28,7 @@ export function PurchaseOptions({
   shippingFee: number;
   freeShippingThreshold: number | null;
 }) {
+  const router = useRouter();
   const prices = PRODUCT_PRICES[productSlug];
   const weightOptions = Object.keys(prices) as ProductWeight[];
   const [weight, setWeight] = useState<ProductWeight>(weightOptions[0]);
@@ -189,6 +191,18 @@ export function PurchaseOptions({
           >
             <ShoppingBag className="h-4 w-4" aria-hidden />
             장바구니 담기
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              const saved = addCartItem({ productSlug, weight, grind, quantity });
+              setCartStatus(saved ? "success" : "error");
+              if (saved) router.push("/checkout");
+            }}
+            className="inline-flex h-12 items-center justify-center rounded-full border border-primary px-6 text-sm text-primary transition-colors hover:bg-primary/5"
+          >
+            구매하기
           </button>
 
           {cartStatus === "success" && (
